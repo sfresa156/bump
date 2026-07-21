@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Bump · Gravidez a dois</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f1e9db">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bump">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Karla:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:oklch(96% 0.012 75); --bg2:oklch(94% 0.02 60);
+    --ink:oklch(28% 0.02 260); --muted:oklch(48% 0.02 260);
+    --sage:oklch(62% 0.09 150); --sage-deep:oklch(50% 0.09 150); --sage-soft:oklch(92% 0.03 150); --sage-line:oklch(68% 0.085 150);
+    --peach:oklch(88% 0.06 20); --coral:oklch(65% 0.09 20);
+    --pink:oklch(88% 0.06 20); --pink-band:oklch(90% 0.05 20); --pink-soft:oklch(94% 0.03 20);
+    --lav:oklch(85% 0.05 290); --lav-soft:oklch(93% 0.035 290);
+    --card:oklch(99% 0.005 80); --areia:oklch(93% 0.02 80); --line:oklch(90% 0.01 80);
+    --screen:oklch(95% 0.014 78);
+    --shadow:0 2px 10px oklch(50% 0.03 60 / .07);
+    --shadow-sm:0 1px 4px oklch(50% 0.03 60 / .05);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{font-family:"SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:linear-gradient(160deg,#f7e6dd 0%,#f4ede3 42%,#f1ece4 100%);color:var(--ink);
+    line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;justify-content:center;min-height:100%}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,textarea,select{font-family:inherit;font-size:15px}
+  a{color:var(--sage-deep)}
+
+  /* Phone frame */
+  .phone{width:100%;max-width:440px;background:linear-gradient(180deg,#f7efe5 0%,#f5ede3 100%);
+    min-height:100vh;position:relative;display:flex;flex-direction:column;
+    box-shadow:0 0 70px rgba(120,90,90,.12);overflow:hidden}
+  @media(min-width:480px){
+    body{align-items:center;padding:22px 0}
+    .phone{min-height:auto;height:calc(100vh - 44px);max-height:900px;border-radius:44px;
+      border:10px solid #14110f;box-shadow:0 30px 70px rgba(80,50,50,.28)}
+  }
+
+  /* Status bar */
+  .statusbar{display:flex;align-items:center;justify-content:space-between;padding:12px 26px 6px;
+    font-size:15px;font-weight:700;color:var(--ink);flex-shrink:0;background:var(--screen)}
+  .statusbar .notch{width:120px;height:26px;background:#14110f;border-radius:0 0 18px 18px;margin-top:-12px}
+  .statusbar .rig{display:flex;gap:6px;align-items:center;font-size:13px}
+
+  /* Top hero header (main tabs) */
+  .hero{background:var(--screen);padding:6px 20px 18px;flex-shrink:0}
+  .hero-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+  .cbtn{width:44px;height:44px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);
+    display:grid;place-items:center;font-size:20px;color:var(--ink)}
+  .cbtn.small{font-size:22px}
+  .avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--lav),#bfa9df);
+    display:grid;place-items:center;color:#fff;font-weight:700;font-size:15px;box-shadow:var(--shadow-sm)}
+
+  /* Scroll area */
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;background:transparent}
+  .pad{padding:16px 18px 108px}
+
+  .tela{display:none} .tela.ativa{display:flex;flex-direction:column;flex:1;min-height:0;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  .greet{color:var(--sage-deep);font-size:14px;font-weight:600}
+  .h1{font-size:29px;font-weight:800;letter-spacing:-.5px;line-height:1.1}
+  .h2{font-size:23px;font-weight:800;letter-spacing:-.4px}
+  .lead{color:var(--muted);font-size:14px}
+  .seclab{font-size:13px;font-weight:700;color:var(--sage-deep);margin:20px 2px 9px;letter-spacing:.2px}
+
+  /* Cards */
+  .card{background:var(--card);border-radius:22px;padding:17px 18px;box-shadow:var(--shadow-sm);margin-bottom:13px}
+  .card.flat{box-shadow:none;border:1px solid var(--line);background:var(--areia)}
+
+  /* Fruit / size gradient card */
+  .fruit{background:linear-gradient(135deg,#eec6cf 0%,#d7c6e8 100%);border-radius:24px;padding:20px;
+    margin-top:6px;box-shadow:0 8px 26px rgba(180,150,180,.22)}
+  .fruit .lab{font-size:14px;color:#6a5866;font-weight:600}
+  .fruit .big{font-size:30px;font-weight:800;color:#3a2f3a;margin:2px 0 14px;letter-spacing:-.5px}
+  .fruit .bar{height:9px;background:rgba(255,255,255,.55);border-radius:6px;overflow:hidden}
+  .fruit .bar span{display:block;height:100%;background:#fff;border-radius:6px}
+  .fruit .cap{font-size:13px;color:#6a5866;font-weight:600;margin-top:9px}
+
+  .tip .t{color:var(--sage-deep);font-weight:700;font-size:14.5px;margin-bottom:4px}
+  .tip p{font-size:14.5px;color:#5a5257}
+
+  .appt{display:flex;align-items:center;gap:12px}
+  .appt .info{flex:1}
+  .appt .info .k{font-weight:700;font-size:14.5px}
+  .appt .info .v{font-size:13px;color:var(--muted)}
+  .rsvp{background:var(--sage-soft);color:var(--sage-deep);font-weight:700;font-size:13px;
+    padding:8px 15px;border-radius:20px;white-space:nowrap}
+
+  /* Quick tools grid */
+  .qgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .qtile{background:var(--card);border-radius:20px;padding:15px;box-shadow:var(--shadow-sm);text-align:left;
+    display:flex;flex-direction:column;gap:9px;min-height:96px;justify-content:space-between}
+  .qtile .qi{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-size:20px}
+  .qtile .qn{font-weight:700;font-size:14px}
+  .qtile .qs{font-size:11.5px;color:var(--muted);margin-top:-4px}
+  .bg-pink{background:var(--pink-soft)} .bg-sage{background:var(--sage-soft)}
+  .bg-lav{background:var(--lav-soft)} .bg-areia{background:var(--areia)}
+
+  /* Segmented progress */
+  .segs{display:flex;gap:5px;margin:14px 0 4px}
+  .segs i{flex:1;height:7px;border-radius:4px;background:#e4ddd4}
+  .segs i.on{background:var(--sage-line)}
+
+  /* Size art + dev */
+  .sizeart{display:flex;align-items:center;gap:16px}
+  .artcircle{width:78px;height:78px;border-radius:50%;flex-shrink:0;
+    background:repeating-linear-gradient(45deg,#f6d3d3,#f6d3d3 7px,#fbe6e6 7px,#fbe6e6 14px);
+    display:grid;place-items:center;font-size:30px}
+  .sizeart .big{font-size:21px;font-weight:800}
+  .sizeart .sub{font-size:13.5px;color:var(--muted)}
+
+  .expect{display:flex;gap:11px;align-items:flex-start;background:var(--areia);border-radius:16px;padding:13px 14px;margin-bottom:10px}
+  .expect .e{font-size:20px;flex-shrink:0}
+  .expect p{font-size:14px;color:#4f484c}
+
+  .help{display:flex;gap:11px;align-items:flex-start;padding:9px 2px;cursor:pointer}
+  .help .mk{width:24px;height:24px;border-radius:8px;border:2px solid var(--sage-line);flex-shrink:0;
+    display:grid;place-items:center;background:#fff;transition:.15s}
+  .help.on .mk{background:var(--sage-line);border-color:var(--sage-line)}
+  .help.on .mk::after{content:"✓";color:#fff;font-weight:800;font-size:13px}
+  .help p{font-size:14.5px} .help.on p{color:var(--muted);text-decoration:line-through}
+
+  /* Checklist items (shared) */
+  .item{display:flex;align-items:flex-start;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .item:last-child{border-bottom:none}
+  .chk{flex-shrink:0;width:24px;height:24px;border:2px solid var(--pink);border-radius:8px;
+    display:grid;place-items:center;margin-top:1px;background:#fff;transition:.15s}
+  .chk.on{background:var(--pink);border-color:var(--pink)}
+  .chk.on::after{content:"✓";color:#fff;font-size:14px;font-weight:800}
+  .chk.sage{border-color:var(--sage-line)} .chk.sage.on{background:var(--sage-line)}
+  .item .txt{flex:1}.item .txt .nome{font-size:14.5px}
+  .item.done .txt .nome{text-decoration:line-through;color:var(--muted)}
+  .item .txt .meta{font-size:12px;color:var(--muted);margin-top:1px}
+  .item .qtd{font-size:12px;color:var(--muted);white-space:nowrap}
+  .tagmini{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 8px;border-radius:12px;margin-left:6px;vertical-align:middle}
+  .t-consulta{background:var(--pink-soft);color:#c1727f}.t-exame{background:#e7edf6;color:#5470a0}.t-lav{background:var(--sage-soft);color:var(--sage-deep)}
+
+  /* Accordion */
+  .grupo{margin-bottom:11px}
+  .grupo-cab{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:13px 15px;
+    background:var(--card);border-radius:16px;font-weight:700;font-size:14.5px;box-shadow:var(--shadow-sm)}
+  .grupo-cab .cont{font-size:12px;color:var(--muted);font-weight:600;display:flex;gap:7px;align-items:center}
+  .grupo-corpo{padding:3px 14px 6px;display:none}
+  .grupo.aberto .grupo-corpo{display:block}
+  .seta{transition:.2s;color:var(--muted)} .grupo.aberto .seta{transform:rotate(90deg)}
+
+  .aviso{background:var(--sage-soft);border-radius:15px;padding:12px 14px;font-size:12.8px;color:var(--sage-deep);display:flex;gap:9px;margin-bottom:6px}
+  .aviso.d{background:#f6ecd8;color:#a97f3f}
+
+  /* Finance */
+  .fin-top{display:flex;gap:10px;margin-bottom:14px}
+  .fin-box{flex:1;background:var(--areia);border-radius:16px;padding:12px 8px;text-align:center}
+  .fin-box .v{font-size:17px;font-weight:800}.fin-box .l{font-size:11px;color:var(--muted)}
+  .barra{height:9px;background:var(--line);border-radius:6px;overflow:hidden}
+  .barra span{display:block;height:100%;border-radius:6px;background:var(--pink);transition:.4s}
+  .barra.sage span{background:var(--sage-line)}
+  .add-row{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+  .add-row input,.add-row select{flex:1;min-width:88px;padding:11px 12px;border:1px solid var(--line);border-radius:13px;background:#fff}
+  .btn{background:var(--sage);color:#fff;font-weight:700;padding:12px 18px;border-radius:14px;font-size:14.5px}
+  .btn.pink{background:var(--pink);color:#8a4a52}
+  .btn.ghost{background:#fff;color:var(--sage-deep);border:1.5px solid var(--sage-line)}
+  .btn.block{width:100%;text-align:center}
+  .btn.sm{padding:8px 13px;font-size:13px;border-radius:11px}
+  .fin-item{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px solid var(--line)}
+  .fin-item:last-child{border:none}.fin-item .n{flex:1;font-size:14px}
+  .fin-item .cat{font-size:11px;color:var(--muted)}.fin-item .val{font-weight:700;font-size:14px}
+  .lixo{color:var(--muted);font-size:16px;padding:2px 6px}
+
+  .info-bloco{padding:13px 0;border-bottom:1px solid var(--line)}.info-bloco:last-child{border:none}
+  .info-bloco h4{font-size:14.5px;margin-bottom:3px;display:flex;align-items:center;gap:9px}
+  .info-bloco p{font-size:13.3px;color:#5f585c}
+  .ico{width:30px;height:30px;border-radius:10px;display:inline-grid;place-items:center;font-size:15px;flex-shrink:0}
+  .ico.r{background:var(--pink-soft)}.ico.s{background:var(--sage-soft)}.ico.d{background:#f6ecd8}
+
+  .insp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .insp{background:var(--areia);border-radius:16px;padding:14px;position:relative}
+  .insp .cat{font-size:11px;font-weight:700;color:var(--sage-deep);text-transform:uppercase;letter-spacing:.4px}
+  .insp .ti{font-size:14px;font-weight:700;margin:3px 0}.insp .ob{font-size:12.5px;color:var(--muted)}
+  .insp a{font-size:12px;word-break:break-all}
+
+  .campo{margin-bottom:14px}.campo label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:#5f585c}
+  .campo input,.campo select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:13px;background:#fff}
+
+  /* Mais list */
+  .mrow{display:flex;align-items:center;gap:14px;padding:15px 16px;background:var(--card);border-radius:18px;
+    box-shadow:var(--shadow-sm);margin-bottom:11px;cursor:pointer}
+  .mrow .mi{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;flex-shrink:0}
+  .mrow .mt{flex:1}.mrow .mt .a{font-weight:700;font-size:15px}.mrow .mt .b{font-size:12.5px;color:var(--muted)}
+  .mrow .chev{color:var(--muted);font-size:20px}
+
+  /* Bottom tab bar */
+  nav.tab{position:absolute;bottom:0;left:0;right:0;background:rgba(255,253,251,.94);backdrop-filter:blur(10px);
+    border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px 4px 12px;z-index:30}
+  nav.tab button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;color:var(--muted);font-weight:600}
+  nav.tab button .i{font-size:21px;line-height:1;filter:grayscale(.2);opacity:.6}
+  nav.tab button.on{color:var(--sage-deep)} nav.tab button.on .i{filter:none;opacity:1}
+
+  /* Onboarding */
+  .onb{position:absolute;inset:0;z-index:60;background:linear-gradient(180deg,#f9e7de 0%,#f6efe4 55%);
+    display:flex;flex-direction:column}
+  .onb .band{background:var(--pink-band);flex:0 0 auto;padding:14px 20px 20px}
+  .onb-dots{display:flex;gap:6px;justify-content:center;padding:6px 0}
+  .onb-dots i{width:7px;height:7px;border-radius:5px;background:#e2c9c6}
+  .onb-dots i.on{width:22px;background:var(--sage-line)}
+  .onb-body{flex:1;overflow-y:auto;padding:26px 26px 20px;display:flex;flex-direction:column}
+  .onb-illus{width:150px;height:150px;border-radius:50%;margin:8px auto 26px;
+    background:repeating-linear-gradient(45deg,#f4cccc,#f4cccc 9px,#fbe6e6 9px,#fbe6e6 18px);
+    display:grid;place-items:center;text-align:center;font-size:12px;color:#b98a8a;font-weight:600}
+  .onb h1{font-size:30px;font-weight:800;letter-spacing:-.6px;text-align:center;margin-bottom:12px}
+  .onb .p{font-size:15px;color:#6a6165;text-align:center;max-width:300px;margin:0 auto}
+  .onb-foot{padding:16px 24px calc(20px + env(safe-area-inset-bottom));display:flex;gap:12px;align-items:center}
+  .role{display:flex;align-items:center;gap:14px;padding:16px;border-radius:18px;background:#fff;
+    border:2px solid transparent;box-shadow:var(--shadow-sm);margin-bottom:12px;cursor:pointer;transition:.15s}
+  .role.sel{border-color:var(--sage-line);background:#fbfdf9}
+  .role .re{width:46px;height:46px;border-radius:14px;background:var(--areia);display:grid;place-items:center;font-size:23px}
+  .role .rt{flex:1}.role .rt .a{font-weight:700;font-size:15.5px}.role .rt .b{font-size:12.5px;color:var(--muted)}
+  .role .rc{width:24px;height:24px;border-radius:50%;border:2px solid #ddd6d0;display:grid;place-items:center}
+  .role.sel .rc{border-color:var(--sage-line);background:var(--sage-line)}
+  .role.sel .rc::after{content:"✓";color:#fff;font-size:13px;font-weight:800}
+  .backghost{background:none;color:var(--muted);font-weight:600;font-size:15px;padding:12px}
+
+  /* Caderneta */
+  .vitals{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .vital{background:var(--areia);border-radius:14px;padding:11px 13px}
+  .vital .vk{font-size:11px;color:var(--muted);font-weight:600}
+  .vital .vv{font-size:18px;font-weight:800;margin-top:1px}
+  .reg-item{border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:11px;background:var(--card)}
+  .reg-item .rh{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+  .reg-item .rh .sem{font-weight:800;font-size:15px}
+  .reg-item .rh .dt{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+  .reg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+  .reg-grid div .a{font-size:15px;font-weight:800}
+  .reg-grid div .b{font-size:10px;color:var(--muted);margin-top:1px}
+  .field{margin-bottom:11px}
+  .field label{display:block;font-size:12.5px;font-weight:600;margin-bottom:5px;color:#5f585c}
+  .field input,.field select,.field textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:12px;background:#fff}
+  .field.half{display:inline-block;width:calc(50% - 5px);vertical-align:top}
+  .wbar{height:15px;border-radius:9px;background:var(--line);overflow:hidden;margin:11px 0 8px}
+  .wbar span{display:block;height:100%;background:var(--sage-line);border-radius:9px;transition:.4s}
+  .imc-tag{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;background:var(--sage-soft);color:var(--sage-deep)}
+  .guia-body p{font-size:13.6px;color:#5a5257;margin-bottom:8px}
+  .guia-body p:last-child{margin-bottom:2px}
+  .guia-body p b{color:var(--ink);font-weight:700}
+
+  /* ===== Refinamento visual — mockup Bump (fontes, ícones menores, acabamento) ===== */
+  body{font-family:'Karla',-apple-system,BlinkMacSystemFont,sans-serif;background:oklch(94% 0.014 75)}
+  .phone{background:var(--bg)}
+  .h1,.h2,.greet,.seclab,.hero-row *,.btn,.rsvp,.grupo-cab,.mrow .mt .a,.qtile .qn,.fruit .big,.fruit .lab,.fruit .cap,
+  .metric .big,.vital .vv,.sizeart .big,.reg-item .sem,.tip .t,.onb h1,.role .rt .a,.imc-tag,.pill,.insp .cat{font-family:'Nunito',sans-serif}
+  nav.tab button{font-family:'Nunito',sans-serif;font-weight:700}
+  h2.titulo{font-family:'Nunito',sans-serif}
+  /* cartões: borda sutil, sombra mínima (como no mockup) */
+  .card{border:1px solid var(--line);box-shadow:none}
+  .grupo-cab{border:1px solid var(--line);box-shadow:none}
+  /* botões primários: único elemento com sombra colorida */
+  .btn{border-radius:16px;box-shadow:0 8px 18px oklch(62% 0.09 150 / .28)}
+  .btn.pink{box-shadow:0 8px 18px oklch(65% 0.09 20 / .26)}
+  .btn.ghost,.btn.sm{box-shadow:none}
+  /* ícones menores e discretos */
+  nav.tab button .i{font-size:17px;opacity:.7}
+  nav.tab button.on .i{opacity:1}
+  .mrow .mi{width:34px;height:34px;border-radius:11px;font-size:16px}
+  .qtile .qi{width:34px;height:34px;border-radius:11px;font-size:16px}
+  .qtile{min-height:86px}
+  .ico{width:24px;height:24px;border-radius:8px;font-size:12px}
+  .cbtn{width:40px;height:40px;font-size:18px;box-shadow:var(--shadow-sm)}
+  .avatar{width:40px;height:40px;font-size:14px;background:linear-gradient(135deg,var(--lav),oklch(78% 0.06 290))}
+  .artcircle{width:64px;height:64px;font-size:26px}
+  .expect .e{font-size:17px}
+  .info-bloco h4 .ico{width:26px;height:26px}
+  /* caixas de seleção verdes = estado positivo (padrão do mockup) */
+  .chk{border-color:var(--sage-line)}
+  .chk.on{background:var(--sage-line);border-color:var(--sage-line)}
+  /* card do tamanho do bebê: gradiente pêssego → lavanda */
+  .fruit{background:linear-gradient(135deg, oklch(90% 0.05 20) 0%, oklch(86% 0.05 290) 100%)}
+  /* logo (marca de dois círculos + wordmark) */
+  .brand{display:flex;align-items:center;gap:8px}
+  .logo-mark{position:relative;flex-shrink:0;width:30px;height:30px}
+  .logo-mark .p{position:absolute;inset:0;border-radius:50%;background:var(--peach)}
+  .logo-mark .s{position:absolute;width:16px;height:16px;border-radius:50%;background:oklch(80% 0.07 150);bottom:-1px;right:-1px;border:2.5px solid var(--screen)}
+  .logo-word{font-family:'Nunito',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.01em;color:var(--ink)}
+  .logo-mark.big{width:72px;height:72px}
+  .logo-mark.big .s{width:38px;height:38px;border-width:4px}
+
+  /* ===== App normal: sem moldura de iPhone, sem barra de status ===== */
+  .phone{background:var(--bg);box-shadow:none}
+  @media(min-width:480px){ .phone{border:none;border-radius:24px;box-shadow:0 12px 44px oklch(40% 0.02 60 / .12);height:calc(100vh - 44px);max-height:920px} }
+  .hero{background:transparent;padding:0}
+  .pad{padding:14px 18px 40px}
+
+  /* Top bar (logo-menu à esquerda, avatar à direita) */
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    padding:calc(15px + env(safe-area-inset-top)) 18px 6px}
+  .brand{display:flex;align-items:center;gap:8px;background:none;padding:4px 6px 4px 2px;border-radius:12px}
+  .brand:active{background:var(--areia)}
+  .brand .caret{color:var(--muted);font-size:11px;margin-left:1px;transform:translateY(1px)}
+  .avatar{border:none}
+  .page-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:25px;letter-spacing:-.3px;padding:2px 18px 2px}
+  .leaf-head{display:flex;align-items:center;gap:10px;padding:2px 14px 2px}
+  .leaf-head .page-title{padding:0;font-size:20px}
+  .backx{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+    font-size:19px;color:var(--ink);display:grid;place-items:center;flex-shrink:0}
+
+  /* Menu dropdown a partir do logo */
+  .menu-backdrop{position:absolute;inset:0;z-index:45;display:none}
+  .menu-backdrop.open{display:block}
+  .menu-drop{position:absolute;top:calc(56px + env(safe-area-inset-top));left:16px;width:236px;z-index:50;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px;
+    box-shadow:0 16px 36px oklch(38% 0.03 60 / .18);display:none}
+  .menu-drop.open{display:block;animation:menuIn .16s ease}
+  @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+  .menu-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--ink)}
+  .menu-item.on{background:var(--sage-soft);color:var(--sage-deep)}
+  .menu-item .mi{width:28px;height:28px;display:grid;place-items:center;color:var(--muted)}
+  .menu-item.on .mi{color:var(--sage-deep)}
+  .menu-sep{height:1px;background:var(--line);margin:5px 8px}
+
+  /* ===== Ícones de linha, cor única, sem tiles coloridos (menos "Notion") ===== */
+  .mrow .mi,.qtile .qi{background:oklch(96% 0.008 150);color:var(--sage-deep)}
+  .mrow .mi svg,.qtile .qi svg,.menu-item .mi svg{width:19px;height:19px;display:block}
+  .qtile .qi svg{width:20px;height:20px}
+</style>
+</head>
+<body>
+<div class="phone">
+  <!-- LOGIN (nuvem) -->
+  <div class="onb" id="authGate" style="display:none">
+    <div class="onb-body" id="authBody"></div>
+    <div class="onb-foot" id="authFoot"></div>
+  </div>
+
+  <!-- ONBOARDING -->
+  <div class="onb" id="onb" style="display:none">
+    <div class="band"><div class="onb-dots" id="onbDots"></div></div>
+    <div class="onb-body" id="onbBody"></div>
+    <div class="onb-foot" id="onbFoot"></div>
+  </div>
+
+  <!-- APP HEADER (dynamic) -->
+  <div class="hero" id="hero"></div>
+  <div class="menu-backdrop" id="menuBg" onclick="closeMenu()"></div>
+  <div class="menu-drop" id="menuDrop"></div>
+
+  <div class="scroll" id="scroll">
+    <div class="pad">
+      <!-- INÍCIO -->
+      <section class="tela ativa" id="t-inicio"></section>
+      <!-- SEÇÕES (hubs) -->
+      <section class="tela" id="t-secBebe"></section>
+      <section class="tela" id="t-secSaude"></section>
+      <section class="tela" id="t-secEnxoval"></section>
+      <section class="tela" id="t-secAdmin"></section>
+      <!-- BEBÊ (acompanhamento semanal) -->
+      <section class="tela" id="t-bebe"></section>
+      <!-- PRÉ-NATAL -->
+      <section class="tela" id="t-prenatal">
+        <div class="aviso">💡 O Ministério da Saúde recomenda no mínimo 6 consultas: 1 no 1º trimestre, 2 no 2º e 3 no 3º. Mensais até a 34ª semana, quinzenais até a 38ª e semanais até o parto.</div>
+        <div id="prenatalLista" style="margin-top:12px"></div>
+      </section>
+      <!-- ENXOVAL -->
+      <section class="tela" id="t-enxoval">
+        <div style="display:flex;gap:8px;margin-bottom:14px">
+          <button class="btn sm" id="subRoupas" onclick="subEnx('roupas')">👕 Roupas</button>
+          <button class="btn sm ghost" id="subAcess" onclick="subEnx('acessorios')">🧸 Acessórios</button>
+        </div>
+        <div id="enxovalLista"></div>
+      </section>
+      <!-- MAIS -->
+      <section class="tela" id="t-mais"></section>
+      <!-- MALA -->
+      <section class="tela" id="t-mala">
+        <div class="aviso d">📄 A certidão de nascimento é emitida após o parto. Leve seus documentos com cópias numa pasta transparente para agilizar admissão e registro.</div>
+        <div id="malaLista" style="margin-top:12px"></div>
+      </section>
+      <!-- GASTOS -->
+      <section class="tela" id="t-gastos">
+        <div class="card">
+          <div class="fin-top">
+            <div class="fin-box"><div class="v" id="finOrc">R$ 0</div><div class="l">Orçamento</div></div>
+            <div class="fin-box"><div class="v" id="finGasto" style="color:#c1727f">R$ 0</div><div class="l">Já gasto</div></div>
+            <div class="fin-box"><div class="v" id="finRest" style="color:var(--sage-deep)">R$ 0</div><div class="l">Disponível</div></div>
+          </div>
+          <div class="barra"><span id="finBarra" style="width:0%"></span></div>
+          <div class="add-row">
+            <input id="finNome" placeholder="Item (ex: berço)">
+            <input id="finVal" type="number" placeholder="R$" style="max-width:88px">
+          </div>
+          <div class="add-row">
+            <select id="finCat"><option>Roupas</option><option>Mobília</option><option>Higiene</option><option>Amamentação</option><option>Passeio</option><option>Saúde</option><option>Outros</option></select>
+            <button class="btn" onclick="addGasto()">Adicionar</button>
+          </div>
+        </div>
+        <div class="card"><div class="seclab" style="margin-top:0">Gastos registrados</div><div id="finLista"></div></div>
+      </section>
+      <!-- DIREITOS -->
+      <section class="tela" id="t-direitos">
+        <div class="card"><div class="seclab" style="margin-top:0">Seus direitos no Brasil</div><div id="direitosInfo"></div></div>
+        <div class="card"><div class="seclab" style="margin-top:0">Documentos <span id="docCont" style="color:var(--muted);font-weight:600"></span></div><div id="docLista"></div></div>
+      </section>
+      <!-- PÓS-PARTO -->
+      <section class="tela" id="t-posparto">
+        <div id="pospartoLista"></div>
+        <div class="card" style="background:#fdf4f4">
+          <div class="seclab" style="margin-top:0;color:#c1727f">🚨 Sinais de alerta — procure ajuda</div>
+          <div id="alertas"></div>
+        </div>
+      </section>
+      <!-- INSPIRAÇÕES -->
+      <section class="tela" id="t-inspiracoes">
+        <div class="card">
+          <div class="add-row">
+            <input id="inspTi" placeholder="Título (ex: tema do quarto)">
+            <select id="inspCat"><option>Quartinho</option><option>Chá de bebê</option><option>Ensaio</option><option>Enxoval</option><option>Nomes</option><option>Outros</option></select>
+          </div>
+          <div class="add-row">
+            <input id="inspLink" placeholder="Link (opcional)">
+            <button class="btn" onclick="addInsp()">Salvar</button>
+          </div>
+        </div>
+        <div class="insp-grid" id="inspGrid"></div>
+      </section>
+      <!-- CADERNETA (hub + subtelas) -->
+      <section class="tela" id="t-caderneta"></section>
+      <section class="tela" id="t-saude"></section>
+      <section class="tela" id="t-consultas"></section>
+      <section class="tela" id="t-peso"></section>
+      <section class="tela" id="t-vacinas"></section>
+      <section class="tela" id="t-guia"></section>
+      <section class="tela" id="t-partorec"></section>
+      <!-- ANEXOS / FOTOS (nuvem) -->
+      <section class="tela" id="t-exames"></section>
+      <section class="tela" id="t-fotos"></section>
+      <!-- PERFIL -->
+      <section class="tela" id="t-config">
+        <div class="card">
+          <div class="campo"><label>Quem é você</label>
+            <select id="cfgRole"><option value="mae">Mãe / gestante</option><option value="pai">Pai / parceiro(a)</option><option value="apoio">Rede de apoio</option></select></div>
+          <div class="campo"><label>Seu nome</label><input id="cfgNome" placeholder="Ex: Mariana"></div>
+          <div class="campo"><label>Nome (ou apelido) do bebê</label><input id="cfgBebe" placeholder="Ex: Bento"></div>
+          <div class="campo"><label>Data da última menstruação (DUM)</label><input id="cfgDum" type="date"></div>
+          <div class="campo"><label>Ou data provável do parto (DPP)</label><input id="cfgDpp" type="date"></div>
+          <div class="campo"><label>Tipo de parto planejado</label>
+            <select id="cfgParto"><option>Ainda não decidi</option><option>Normal</option><option>Cesárea</option><option>Humanizado</option></select></div>
+          <button class="btn block" onclick="salvarPerfil()">Salvar dados</button>
+        </div>
+        <button class="btn ghost block" style="margin-bottom:11px" onclick="verOnboarding()">Rever introdução</button>
+        <button class="btn ghost block" onclick="resetar()">Restaurar dados de exemplo</button>
+        <button class="btn ghost block" id="btnSair" style="display:none;margin-top:11px" onclick="sair()">Sair da conta</button>
+        <div class="seclab" style="margin:18px 2px 8px">Backup dos seus dados</div>
+        <button class="btn ghost block" onclick="exportarDados()">⬇️ Baixar backup (.json)</button>
+        <input id="impFile" type="file" accept="application/json,.json" style="display:none" onchange="importarDados()">
+        <button class="btn ghost block" style="margin-top:11px" onclick="document.getElementById('impFile').click()">⬆️ Restaurar de um backup</button>
+        <div class="lead" style="margin-top:8px">Sem nuvem, seus dados ficam só neste aparelho. Baixe um backup de vez em quando para não perder nada.</div>
+        <div class="aviso" style="margin-top:14px">ℹ️ O Bump é um organizador e não substitui orientação médica. Confirme exames, prazos e itens com seu obstetra e sua maternidade.</div>
+      </section>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ================= CONFIG DA NUVEM (Supabase) =================
+   Para ativar o login compartilhado e o upload de exames/fotos,
+   cole abaixo a URL e a chave "anon public" do seu projeto Supabase.
+   Enquanto estiverem em branco, o app funciona normalmente só neste aparelho. */
+const SUPA_URL = ''; // ex: https://abcdxyz.supabase.co
+const SUPA_KEY = ''; // chave anon public (Settings > API)
+let sb=null, cloud=false, user=null, pushTimer=null;
+try{ if(SUPA_URL && SUPA_KEY && window.supabase){ sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); cloud=true; } }catch(e){ cloud=false; }
+
+/* ================= DADOS ================= */
+function dadosPadrao(){
+  const hoje=new Date(); const dum=new Date(hoje); dum.setDate(dum.getDate()-7*24); // ~24 semanas
+  return {
+  perfil:{ onboarded:true, role:"pai", nome:"Sam", parceira:"Marina", bebe:"Bento", dum:dum.toISOString().slice(0,10), dpp:"", parto:"Humanizado" },
+  prenatal:[
+    {t:1,s:"Até 12 sem",nome:"1ª consulta de pré-natal",tipo:"consulta",feito:true},
+    {t:1,s:"Início",nome:"Abrir a Caderneta da Gestante",tipo:"consulta",feito:true},
+    {t:1,s:"6–12 sem",nome:"Hemograma, tipagem sanguínea e fator Rh",tipo:"exame",feito:true},
+    {t:1,s:"6–12 sem",nome:"Glicemia em jejum",tipo:"exame",feito:true},
+    {t:1,s:"6–12 sem",nome:"Sorologias: HIV, sífilis, hepatite B, toxoplasmose, rubéola",tipo:"exame",feito:true},
+    {t:1,s:"6–12 sem",nome:"Urina tipo 1 e urocultura",tipo:"exame",feito:true},
+    {t:1,s:"11–13+6 sem",nome:"Ultrassom morfológico do 1º trimestre (translucência nucal)",tipo:"exame",feito:true},
+    {t:2,s:"16–20 sem",nome:"2ª consulta de pré-natal",tipo:"consulta",feito:true},
+    {t:2,s:"20–24 sem",nome:"Ultrassom morfológico do 2º trimestre",tipo:"exame",feito:false},
+    {t:2,s:"24–28 sem",nome:"Teste de tolerância à glicose (TOTG)",tipo:"exame",feito:false},
+    {t:2,s:"~28 sem",nome:"3ª consulta de pré-natal",tipo:"consulta",feito:false},
+    {t:2,s:"a partir 28 sem",nome:"Imunoglobulina anti-D (se mãe Rh negativo)",tipo:"exame",feito:false},
+    {t:3,s:"~32 sem",nome:"4ª consulta de pré-natal",tipo:"consulta",feito:false},
+    {t:3,s:"32–36 sem",nome:"Vacinas em dia: dTpa, gripe e hepatite B",tipo:"exame",feito:false},
+    {t:3,s:"35–37 sem",nome:"Pesquisa de estreptococo do grupo B (swab)",tipo:"exame",feito:false},
+    {t:3,s:"~36 sem",nome:"5ª consulta + escrever o plano de parto",tipo:"consulta",feito:false},
+    {t:3,s:"36–40 sem",nome:"Ultrassom de posição e crescimento fetal",tipo:"exame",feito:false},
+    {t:3,s:"38–40 sem",nome:"6ª consulta (semanais até o parto)",tipo:"consulta",feito:false},
+  ],
+  roupas:{
+    "RN (recém-nascido)":[{n:"Body manga longa",q:"6 un",c:true,l:true},{n:"Body manga curta",q:"6 un",c:true,l:false},{n:"Macacão / mijão",q:"6 un",c:true,l:false},{n:"Mijão sem pé",q:"4 un",c:false,l:false},{n:"Casaquinho / pagão",q:"3 un",c:false,l:false},{n:"Meia",q:"5 pares",c:true,l:false},{n:"Luva",q:"2 pares",c:true,l:false},{n:"Touca",q:"2 un",c:false,l:false}],
+    "P (0–3 meses)":[{n:"Body",q:"8 un",c:false,l:false},{n:"Macacão",q:"6 un",c:false,l:false},{n:"Conjunto",q:"4 un",c:false,l:false},{n:"Meia",q:"5 pares",c:false,l:false}],
+    "M (3–6 meses)":[{n:"Body",q:"6 un",c:false,l:false},{n:"Macacão",q:"5 un",c:false,l:false},{n:"Conjunto",q:"4 un",c:false,l:false}],
+    "G (6–12 meses)":[{n:"Body",q:"5 un",c:false,l:false},{n:"Conjunto",q:"5 un",c:false,l:false},{n:"Pijama",q:"3 un",c:false,l:false}],
+  },
+  acessorios:{
+    "Banho":[{n:"Banheira",q:"1",c:false,l:false},{n:"Toalha com capuz",q:"3",c:true,l:false},{n:"Sabonete líquido neutro",q:"1",c:false,l:false},{n:"Termômetro de banho",q:"1",c:false,l:false}],
+    "Higiene & troca":[{n:"Fraldas RN e P",q:"2 pct",c:true,l:false},{n:"Lenços umedecidos",q:"3 pct",c:true,l:false},{n:"Pomada anti-assadura",q:"2",c:false,l:false},{n:"Trocador",q:"1",c:false,l:false},{n:"Cotonete e algodão",q:"1",c:false,l:false}],
+    "Amamentação":[{n:"Almofada de amamentação",q:"1",c:false,l:false},{n:"Sutiã de amamentação",q:"3",c:true,l:false},{n:"Absorvente de seios",q:"1 cx",c:false,l:false},{n:"Bomba de leite",q:"1",c:false,l:false},{n:"Potes p/ leite materno",q:"6",c:false,l:false}],
+    "Passeio":[{n:"Carrinho",q:"1",c:true,l:false},{n:"Bebê conforto",q:"1",c:true,l:false},{n:"Bolsa maternidade",q:"1",c:true,l:false},{n:"Sling / canguru",q:"1",c:false,l:false}],
+    "Quarto & sono":[{n:"Berço",q:"1",c:true,l:false},{n:"Colchão + protetor",q:"1",c:true,l:false},{n:"Lençóis de berço",q:"3",c:false,l:false},{n:"Cobertor / manta",q:"3",c:true,l:true},{n:"Babá eletrônica",q:"1",c:false,l:false}],
+  },
+  mala:{
+    "Mãe":[{n:"Camisola com abertura p/ amamentar",q:"3",c:true},{n:"Robe / roupão",q:"1",c:false},{n:"Chinelo",q:"1",c:true},{n:"Absorvente pós-parto",q:"1 pct",c:false},{n:"Calcinha descartável",q:"1 pct",c:false},{n:"Sutiã de amamentação",q:"2",c:true},{n:"Necessaire de higiene",q:"1",c:false},{n:"Roupa para a alta",q:"1",c:false}],
+    "Bebê":[{n:"Body / macacão p/ saída",q:"2",c:false},{n:"Manta",q:"2",c:true},{n:"Meia e luva",q:"2",c:true},{n:"Touca",q:"1",c:false},{n:"Fraldas RN",q:"1 pct",c:true},{n:"Kit higiene do bebê",q:"1",c:false},{n:"Cobertor de saída",q:"1",c:false}],
+    "Acompanhante":[{n:"Troca de roupa",q:"2",c:false},{n:"Itens de higiene",q:"1",c:false},{n:"Travesseiro / lanche",q:"–",c:false},{n:"Carregador de celular",q:"1",c:false}],
+    "Documentos":[{n:"RG e CPF da mãe (+ cópias)",q:"",c:true},{n:"RG do acompanhante",q:"",c:false},{n:"Cartão do plano / SUS (CNS)",q:"",c:false},{n:"Caderneta da Gestante + exames",q:"",c:true},{n:"Plano de parto (se houver)",q:"",c:false},{n:"Certidão de casamento/união",q:"",c:false}],
+  },
+  financeiro:{ orcamento:5000, itens:[
+    {n:"Berço",cat:"Mobília",v:790,pago:true},{n:"Carrinho + bebê conforto",cat:"Passeio",v:1200,pago:true},{n:"Kit body RN",cat:"Roupas",v:180,pago:true},{n:"Banheira + suporte",cat:"Higiene",v:150,pago:false},{n:"Fraldas (estoque inicial)",cat:"Higiene",v:220,pago:true},
+  ]},
+  posparto:{
+    "Recuperação da mãe":[{n:"Descansar quando o bebê dormir",f:false},{n:"Cuidar dos pontos (cesárea ou episio)",f:false},{n:"Hidratar-se bem, ainda mais amamentando",f:false},{n:"Consulta de puerpério até 42 dias",f:false},{n:"Atenção ao baby blues / depressão pós-parto",f:false}],
+    "Cuidados com o bebê":[{n:"Teste do pezinho (até 5º dia)",f:false},{n:"Testes da orelhinha, olhinho, linguinha e coraçãozinho",f:false},{n:"1ª consulta pediátrica na 1ª semana",f:false},{n:"Vacinas do nascimento: BCG e hepatite B",f:false},{n:"Amamentação sob livre demanda",f:false},{n:"Cuidados com o coto umbilical",f:false}],
+    "Documentos do bebê":[{n:"Registro de nascimento em cartório (gratuito)",f:false},{n:"Incluir o bebê no plano de saúde",f:false},{n:"CPF do bebê",f:false},{n:"Continuidade das vacinas na UBS",f:false}],
+  },
+  alertas:["Mãe: febre, sangramento intenso, dor forte ou vermelhidão na cicatriz","Mãe: tristeza profunda, choro constante ou pensamentos que assustam","Bebê: febre, recusa alimentar, moleira funda, pele/olhos muito amarelados","Bebê: dificuldade para respirar, choro inconsolável ou poucas trocas de fralda"],
+  direitos:[
+    {i:"👶",c:"r",t:"Pré-natal garantido",d:"Direito ao pré-natal completo pelo SUS, com exames e vínculo prévio à maternidade onde dará à luz (Lei 11.634/2007)."},
+    {i:"📆",c:"s",t:"Licença-maternidade de 120 dias",d:"120 dias sem prejuízo do salário — até 180 dias em empresas do Programa Empresa Cidadã e para servidoras públicas."},
+    {i:"👨‍🍼",c:"d",t:"Licença-paternidade",d:"5 dias (CLT), podendo chegar a 20 dias em empresas do Programa Empresa Cidadã."},
+    {i:"💵",c:"s",t:"Salário-maternidade",d:"Pago pelo empregador (CLT) ou pelo INSS (domésticas, autônomas, MEI)."},
+    {i:"🛡️",c:"r",t:"Estabilidade no emprego",d:"Da confirmação da gravidez até 5 meses após o parto, sem demissão sem justa causa."},
+    {i:"👥",c:"d",t:"Acompanhante no parto",d:"Direito a um acompanhante de escolha no trabalho de parto, parto e pós-parto (Lei 11.108/2005)."},
+  ],
+  inspiracoes:[{cat:"Quartinho",ti:"Tema safári tons neutros",ob:"Verde sage + palha",link:""},{cat:"Nomes",ti:"Lista de nomes",ob:"Bento, Theo, Antônio",link:""}],
+  help:{}, // toggles for "como ajudar" by week
+  saude:{ chamada:"Marina", cns:"", nis:"", tipoSangue:"O", rh:"+", altura:1.65, pesoPre:62, alergias:"", emergNome:"Sam", emergTel:"", emergRel:"Companheiro(a)" },
+  consultasReg:[
+    {sem:16,data:"", peso:65, pa:"110/70", au:16, bcf:142},
+    {sem:20,data:"", peso:66.5, pa:"112/72", au:20, bcf:148},
+    {sem:24,data:"", peso:68, pa:"110/70", au:24, bcf:145},
+  ],
+  pesoLog:[{sem:8,kg:62.5},{sem:12,kg:63.5},{sem:16,kg:65},{sem:20,kg:66.5},{sem:24,kg:68}],
+  vacinas:[
+    {n:"dTpa — tétano, difteria e coqueluche", quando:"A partir da 20ª semana", feito:false, data:""},
+    {n:"dT — dupla adulto", quando:"Conforme situação vacinal (esquema de 3 doses)", feito:true, data:""},
+    {n:"Influenza (gripe)", quando:"Em campanha, qualquer trimestre", feito:false, data:""},
+    {n:"Hepatite B", quando:"3 doses, se não vacinada", feito:true, data:""},
+    {n:"COVID-19", quando:"Conforme calendário vigente", feito:false, data:""},
+  ],
+  partoRec:{ tipo:"", data:"", local:"", peso:"", comp:"", apgar1:"", apgar5:"", obs:"" },
+  anexos:[], fotos:[],
+  };
+}
+
+/* Semana → tamanho (fruta) + desenvolvimento (pt-BR) */
+const BABY=[
+  {w:6,f:"lentilha",e:"🫘",cm:0.5,g:1,dev:"Coração começa a bater",esp:["Enjoos e sono podem aparecer","Coração já bate ~110 bpm"],aj:["Ofereça biscoitos secos para o enjoo","Assuma tarefas que exijam esforço"]},
+  {w:8,f:"framboesa",e:"🫐",cm:1.6,g:1,dev:"Bracinhos e pernas se formando",esp:["Seios mais sensíveis","Dedinhos começam a se separar"],aj:["Marquem juntos a 1ª consulta","Tenha paciência com a variação de humor"]},
+  {w:10,f:"morango",e:"🍓",cm:3,g:4,dev:"Órgãos vitais em funcionamento",esp:["Ainda muito enjoo é comum","Unhas começam a nascer"],aj:["Cozinhe algo leve que ela tolere","Ajude a organizar exames"]},
+  {w:12,f:"limão",e:"🍋",cm:5.4,g:14,dev:"Reflexos começam a surgir",esp:["Fim do 1º trimestre se aproxima","Enjoo tende a diminuir"],aj:["Comemorem o ultrassom juntos","Comece a pesquisar a maternidade"]},
+  {w:14,f:"pêssego",e:"🍑",cm:8.7,g:43,dev:"Já faz caretas e franze a testa",esp:["Mais energia deve voltar","Barriga começa a aparecer"],aj:["Planejem o enxoval sem exageros","Incentive caminhadas leves"]},
+  {w:16,f:"abacate",e:"🥑",cm:11.6,g:100,dev:"Começa a ouvir sons",esp:["Pode sentir os primeiros movimentos","Pele ainda transparente"],aj:["Converse com a barriga","Ajude a montar o quarto"]},
+  {w:18,f:"pimentão",e:"🫑",cm:14.2,g:190,dev:"Audição se desenvolvendo",esp:["Mexidas ficam mais nítidas","Possível ultrassom morfológico"],aj:["Cantem para o bebê","Acompanhe o morfológico"]},
+  {w:20,f:"banana",e:"🍌",cm:16.4,g:300,dev:"Metade do caminho!",esp:["Descobrem o sexo, se quiserem","Movimentos diários"],aj:["Registrem a barriga em fotos","Comecem a lista de nomes"]},
+  {w:22,f:"mamão papaia",e:"🥭",cm:27.8,g:430,dev:"Sobrancelhas e cílios aparecem",esp:["Inchaço leve nos pés é comum","Bebê reage a sons"],aj:["Massagem nos pés ajuda muito","Deixe água sempre por perto"]},
+  {w:24,f:"melão",e:"🍈",cm:30,g:600,dev:"Pulmões amadurecem, audição melhora",esp:["Bebê já reconhece sua voz — fale ou cante","Podem surgir contrações de treino (Braxton Hicks)"],aj:["Assuma peso e tarefas pesadas esta semana","Agende o ultrassom morfológico se ainda não fez","Comecem a pesquisar pediatras juntos"]},
+  {w:26,f:"alface",e:"🥬",cm:35,g:760,dev:"Abre e fecha os olhos",esp:["Dores nas costas podem aumentar","Bebê tem soluços"],aj:["Ofereça apoio para as costas ao dormir","Ajude nas tarefas domésticas"]},
+  {w:28,f:"berinjela",e:"🍆",cm:37.6,g:1000,dev:"Começa a sonhar (fase REM)",esp:["Início do 3º trimestre","Consultas ficam mais frequentes"],aj:["Escolham o pediatra","Comecem a mala da maternidade"]},
+  {w:30,f:"repolho",e:"🥬",cm:39.9,g:1300,dev:"Ganha gordurinha e força",esp:["Cansaço volta a aumentar","Falta de ar leve é comum"],aj:["Incentive pausas e descanso","Monte o berço e o quarto"]},
+  {w:32,f:"abacaxi",e:"🍍",cm:42.4,g:1700,dev:"Ossos endurecem, unhas completas",esp:["Hora de deixar a mala pronta","Movimentos mais fortes"],aj:["Finalize a mala maternidade","Confirme o caminho até a maternidade"]},
+  {w:34,f:"melão cantaloupe",e:"🍈",cm:45,g:2100,dev:"Sistema nervoso amadurece",esp:["Swab de estreptococo se aproxima (35–37 sem)","Bebê pode virar de cabeça p/ baixo"],aj:["Revejam o plano de parto","Instale a cadeirinha no carro"]},
+  {w:36,f:"alface romana",e:"🥬",cm:47.4,g:2600,dev:"Quase pronto para nascer",esp:["Consultas passam a ser semanais","Bebê encaixa na pelve"],aj:["Deixe contatos de emergência à mão","Ajude a organizar a casa p/ a chegada"]},
+  {w:38,f:"abóbora",e:"🎃",cm:49.8,g:3100,dev:"Pulmões prontos",esp:["Pode nascer a qualquer momento","Sinais de trabalho de parto a observar"],aj:["Fique de prontidão e com o carro abastecido","Revejam juntos os sinais de parto"]},
+  {w:40,f:"melancia",e:"🍉",cm:51,g:3400,dev:"A termo — pronto para conhecer vocês!",esp:["Semana provável do parto","Fique atento às contrações regulares"],aj:["Mantenha a calma e cronometre as contrações","Leve a mala e os documentos ao sinal do parto"]},
+];
+function babyDaSemana(w){ let best=BABY[0]; for(const b of BABY){ if(w>=b.w) best=b; } return best; }
+
+/* ================= ESTADO ================= */
+let D=carregar();
+function mergeDefaults(d){ const def=dadosPadrao(); for(const k in def){ if(d[k]===undefined) d[k]=def[k]; } return d; }
+function carregar(){ try{const s=localStorage.getItem('bump'); if(s){return mergeDefaults(JSON.parse(s));}}catch(e){} return dadosPadrao(); }
+function salvarLocal(){ try{localStorage.setItem('bump',JSON.stringify(D));}catch(e){} }
+function salvar(){ salvarLocal(); if(cloud&&user){ clearTimeout(pushTimer); pushTimer=setTimeout(pushRemoto,800); } }
+async function pushRemoto(){ if(!cloud||!user)return; try{ await sb.from('app_state').upsert({user_id:user.id,data:D,updated_at:new Date().toISOString()},{onConflict:'user_id'}); }catch(e){} }
+async function carregarRemoto(){
+  try{
+    const {data}=await sb.from('app_state').select('data').eq('user_id',user.id).maybeSingle();
+    if(data&&data.data){ D=mergeDefaults(data.data); salvarLocal(); }
+    else { await pushRemoto(); } // primeira vez: envia o estado local para a nuvem
+  }catch(e){}
+}
+function resetar(){ if(confirm('Restaurar dados de exemplo? Suas alterações serão apagadas.')){ D=dadosPadrao(); salvar(); irPara('inicio'); initTudo(); } }
+function exportarDados(){
+  try{
+    const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download='bump-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},120);
+  }catch(e){ alert('Não foi possível gerar o backup.'); }
+}
+function importarDados(){
+  const inp=document.getElementById('impFile'); const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const obj=JSON.parse(r.result);
+    if(!obj||!obj.perfil){ alert('Arquivo de backup inválido.'); return; }
+    if(!confirm('Restaurar este backup? Os dados atuais neste aparelho serão substituídos.')) return;
+    D=mergeDefaults(obj); salvar(); initTudo(); irPara('inicio'); alert('Backup restaurado 💛');
+  }catch(e){ alert('Não foi possível ler o arquivo.'); } inp.value=''; };
+  r.readAsText(f);
+}
+
+/* ================= CÁLCULOS ================= */
+function calc(){
+  let dum=null,dpp=null;
+  if(D.perfil.dum) dum=new Date(D.perfil.dum+'T00:00');
+  if(D.perfil.dpp){ dpp=new Date(D.perfil.dpp+'T00:00'); if(!dum){dum=new Date(dpp);dum.setDate(dum.getDate()-280);} }
+  if(dum&&!dpp){ dpp=new Date(dum); dpp.setDate(dpp.getDate()+280); }
+  if(!dum) return null;
+  const hoje=new Date(); hoje.setHours(0,0,0,0);
+  const dias=Math.floor((hoje-dum)/864e5);
+  const sem=Math.max(0,Math.floor(dias/7)), d=dias%7;
+  const faltamSem=Math.max(0,40-sem);
+  const tri=sem<14?1:(sem<28?2:3);
+  return {sem,d,dpp,faltamSem,faltamDias:Math.ceil((dpp-hoje)/864e5),tri,pct:Math.max(0,Math.min(100,Math.round(dias/280*100)))};
+}
+function fmtData(dt){return dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'});}
+function reais(v){return 'R$ '+(v||0).toLocaleString('pt-BR');}
+function saudacao(){ const h=new Date().getHours(); return h<12?'Bom dia':(h<18?'Boa tarde':'Boa noite'); }
+function ehMae(){ return D.perfil.role==='mae'; }
+
+/* ================= HEADER ================= */
+const SECTIONS=['secBebe','secSaude','secEnxoval','secAdmin'];
+const PARENT={
+  bebe:'secBebe',posparto:'secBebe',partorec:'secBebe',fotos:'secBebe',
+  saude:'secSaude',prenatal:'secSaude',peso:'secSaude',vacinas:'secSaude',guia:'secSaude',exames:'secSaude',
+  enxoval:'secEnxoval',mala:'secEnxoval',inspiracoes:'secEnxoval',
+  consultas:'secAdmin',gastos:'secAdmin',direitos:'secAdmin',config:'secAdmin'
+};
+const TITULOS={
+  secBebe:'Bebê',secSaude:'Saúde',secEnxoval:'Enxoval',secAdmin:'Admin',
+  bebe:'Acompanhamento semanal',posparto:'Primeiros dias',partorec:'Registro do nascimento',fotos:'Fotos da barriga',
+  saude:'Dados de saúde',prenatal:'Exames do pré-natal',peso:'Ganho de peso',vacinas:'Vacinas',guia:'Guia de cuidados',exames:'Exames & anexos',
+  enxoval:'Enxoval',mala:'Mala maternidade',inspiracoes:'Inspirações',
+  consultas:'Consultas',gastos:'Controle de gastos',direitos:'Direitos & documentos',config:'Meus dados'
+};
+/* ===== Ícones de linha (SVG, cor única) ===== */
+function svg(p){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;}
+const ICON={
+  home:'<path d="M4 11l8-6 8 6"/><path d="M6 10v9h5v-5h2v5h5v-9"/>',
+  baby:'<circle cx="12" cy="7.5" r="3"/><path d="M6.5 20c0-3 2.5-5.5 5.5-5.5S17.5 17 17.5 20"/><path d="M10 7.3h.01M14 7.3h.01"/>',
+  heart:'<path d="M12 20S4 15 4 9.5A3.5 3.5 0 0 1 12 7a3.5 3.5 0 0 1 8 2.5C20 15 12 20 12 20z"/>',
+  basket:'<path d="M5 9h14l-1.1 9a2 2 0 0 1-2 1.8H8.1a2 2 0 0 1-2-1.8z"/><path d="M9 9l3-5 3 5"/><path d="M10 13v3M14 13v3"/>',
+  folder:'<path d="M4 7a2 2 0 0 1 2-2h3.5l2 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>',
+  photo:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 17l4.5-4 3.5 3 3-2.5L19 17"/>',
+  sun:'<circle cx="12" cy="12" r="3.4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
+  doc:'<path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 16.5h4"/>',
+  id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.6 16c.5-1.5 1.9-2.1 2.9-2.1s2.4.6 2.9 2.1"/><path d="M14 10h4M14 13.5h4"/>',
+  pulse:'<path d="M3 12h3l2-5 3.5 10L16 9l1.5 3H21"/>',
+  scaleup:'<path d="M4 20h16"/><path d="M7 20v-5M12 20V9M17 20v-8"/><path d="M14.5 6.5L17 4l2.5 2.5"/>',
+  syringe:'<path d="M14 4l6 6M18.5 5.5l-2 2M11 7l6 6-6 6-1.6-1.6 1.6-1.6-2-2-1.6 1.6-2-2 1.6-1.6-2-2z"/>',
+  clip:'<path d="M16.5 8.5l-7 7a2.7 2.7 0 0 1-3.8-3.8L13 4.4a1.8 1.8 0 0 1 2.6 2.6L8.2 14.3"/>',
+  book:'<path d="M6 4h11a1 1 0 0 1 1 1v13H6.5A2.5 2.5 0 0 0 4 20.5V6a2 2 0 0 1 2-2z"/><path d="M6 18h12"/>',
+  shirt:'<path d="M9 4l-4.5 3L6 10l2-1v10h8V9l2 1 1.5-3L15 4l-3 2.2L9 4z"/>',
+  bag:'<path d="M6.5 8h11l-1 11.5H7.5z"/><path d="M9.2 8V6.2a2.8 2.8 0 0 1 5.6 0V8"/>',
+  star:'<path d="M12 4l2.1 4.5 4.9.6-3.6 3.4 1 4.9L12 15.9 7.6 17.4l1-4.9L5 9.1l4.9-.6z"/>',
+  calendar:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/>',
+  wallet:'<rect x="3.5" y="6" width="17" height="13" rx="2.2"/><path d="M3.5 10h17"/><circle cx="16.5" cy="14" r="1.1"/>',
+  shield:'<path d="M12 3l7 2.8V11c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V5.8z"/><path d="M9.2 12l2 2 3.6-3.8"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M18 6l-1.4 1.4M7.4 16.6L6 18"/>',
+};
+function secIcon(key){ const m={inicio:'home',secBebe:'baby',secSaude:'heart',secEnxoval:'basket',secAdmin:'folder',
+  bebe:'baby',fotos:'photo',posparto:'sun',partorec:'doc',saude:'id',prenatal:'pulse',peso:'scaleup',vacinas:'syringe',exames:'clip',guia:'book',enxoval:'shirt',mala:'bag',inspiracoes:'star',consultas:'calendar',gastos:'wallet',direitos:'shield',config:'gear'};
+  return svg(ICON[m[key]]||ICON.folder); }
+
+/* ===== Menu suspenso a partir do logo ===== */
+const MENUSEC=[['inicio','Início'],['secBebe','Bebê'],['secSaude','Saúde'],['secEnxoval','Enxoval'],['secAdmin','Admin']];
+function renderMenu(){ const m=document.getElementById('menuDrop'); if(!m)return;
+  m.innerHTML=MENUSEC.map(s=>`<div class="menu-item" data-k="${s[0]}" onclick="irPara('${s[0]}');closeMenu()"><span class="mi">${secIcon(s[0])}</span>${s[1]}</div>`).join('')
+   +`<div class="menu-sep"></div><div class="menu-item" data-k="config" onclick="irPara('config');closeMenu()"><span class="mi">${secIcon('config')}</span>Meus dados</div>`;
+}
+let menuOpen=false;
+function toggleMenu(e){ if(e){e.stopPropagation();} menuOpen=!menuOpen; document.getElementById('menuDrop').classList.toggle('open',menuOpen); document.getElementById('menuBg').classList.toggle('open',menuOpen); }
+function closeMenu(){ menuOpen=false; const d=document.getElementById('menuDrop'),b=document.getElementById('menuBg'); if(d)d.classList.remove('open'); if(b)b.classList.remove('open'); }
+function updateMenuActive(k){ document.querySelectorAll('#menuDrop .menu-item').forEach(el=>el.classList.toggle('on', el.dataset.k===k)); }
+
+function topbarHTML(){ const nome=D.perfil.nome||'';
+  return `<div class="topbar">
+    <button class="brand" onclick="toggleMenu(event)"><span class="logo-mark"><span class="p"></span><span class="s"></span></span><span class="logo-word">bump</span><span class="caret">▾</span></button>
+    <button class="avatar" onclick="irPara('config')">${(nome[0]||'B').toUpperCase()}</button></div>`;
+}
+function renderHero(t){
+  const hero=document.getElementById('hero'); let below='';
+  if(SECTIONS.includes(t)){ below=`<div class="page-title">${TITULOS[t]}</div>`; }
+  else if(t!=='inicio'){ const back=PARENT[t]||'inicio'; below=`<div class="leaf-head"><button class="backx" onclick="irPara('${back}')">‹</button><div class="page-title">${TITULOS[t]||''}</div></div>`; }
+  hero.innerHTML=topbarHTML()+below;
+  updateMenuActive(SECTIONS.includes(t)?t:(t==='inicio'?'inicio':(PARENT[t]||'inicio')));
+}
+function hubHTML(sub,rows){
+  return `<div class="lead" style="margin:-2px 0 14px">${sub}</div>`+rows.map(r=>`<div class="mrow" onclick="irPara('${r[0]}')"><div class="mi">${secIcon(r[0])}</div><div class="mt"><div class="a">${r[3]}</div><div class="b">${r[4]}</div></div><div class="chev">›</div></div>`).join('');
+}
+function renderSecBebe(){ document.getElementById('t-secBebe').innerHTML=hubHTML('Acompanhe o desenvolvimento e os cuidados com o bebê.',[
+  ['bebe','👶','bg-pink','Acompanhamento semanal','Tamanho, desenvolvimento e como ajudar'],
+  ['fotos','📷','bg-lav','Fotos da barriga','Evolução e ultrassons (na nuvem)'],
+  ['posparto','🍼','bg-areia','Primeiros dias','Pós-parto, recuperação e cuidados do bebê'],
+  ['partorec','📋','bg-sage','Registro do nascimento','Dados do parto e do bebê'],
+]); }
+function renderSecSaude(){ document.getElementById('t-secSaude').innerHTML=hubHTML('Sua caderneta de saúde da gestante, baseada no Ministério da Saúde.',[
+  ['saude','🪪','bg-lav','Dados de saúde','Cartão SUS, tipo sanguíneo, emergência'],
+  ['prenatal','🩺','bg-sage','Exames do pré-natal','Consultas e exames por trimestre'],
+  ['peso','⚖️','bg-pink','Ganho de peso','Faixa recomendada pelo seu IMC'],
+  ['vacinas','💉','bg-areia','Vacinas','dTpa, dT, gripe, hepatite B, COVID-19'],
+  ['exames','📎','bg-pink','Exames & anexos','Resultados e laudos (PDF/foto), na nuvem'],
+  ['guia','📖','bg-lav','Guia de cuidados','Alimentação, sinais de alerta, parto'],
+]); }
+function renderSecEnxoval(){ document.getElementById('t-secEnxoval').innerHTML=hubHTML('Prepare o enxoval e a chegada do bebê, sem exageros.',[
+  ['enxoval','🧺','bg-pink','Roupas & acessórios','Por tamanho e categoria, comprado e lavado'],
+  ['mala','🧳','bg-lav','Mala maternidade','Mãe, bebê, acompanhante e documentos'],
+  ['inspiracoes','✨','bg-sage','Inspirações','Quartinho, chá de bebê, nomes'],
+]); }
+function renderSecAdmin(){ document.getElementById('t-secAdmin').innerHTML=hubHTML('Agenda, finanças e a papelada da gestação em um só lugar.',[
+  ['consultas','📅','bg-sage','Consultas','Agenda e registro de peso, pressão e BCF'],
+  ['gastos','💰','bg-pink','Gastos','Orçamento do enxoval em tempo real'],
+  ['direitos','⚖️','bg-lav','Direitos & documentos','Licenças, salário-maternidade e registro'],
+  ['config','⚙️','bg-areia','Meus dados','Perfil, datas e preferências'],
+]); }
+
+/* ================= INÍCIO ================= */
+function renderInicio(){
+  const g=calc(); const el=document.getElementById('t-inicio');
+  const nome=D.perfil.nome||'';
+  const b=g?babyDaSemana(g.sem):BABY[9];
+  // próxima consulta pendente
+  const prox=D.prenatal.find(x=>!x.feito&&x.tipo==='consulta')||D.prenatal.find(x=>!x.feito);
+  const dica = g? dicaSemana(g) : "Configure sua data em Meus dados para ver dicas.";
+  el.innerHTML=`
+    <div class="greet">${saudacao()}, ${nome||'por aí'}</div>
+    <div class="h1">${g?('Semana '+g.sem):'Bem-vindo ao Bump'}</div>
+    <div class="fruit">
+      <div class="lab">Seu bebê está do tamanho de um(a)</div>
+      <div class="big">${b.f} ${b.e}</div>
+      <div class="bar"><span style="width:${g?g.pct:0}%"></span></div>
+      <div class="cap">${g?`${g.pct}% da gestação — faltam ${g.faltamSem} semanas`:'—'}</div>
+    </div>
+    <div class="card tip"><div class="t">Dica de hoje para vocês</div><p>${dica}</p></div>
+    <div class="card appt">
+      <div class="info"><div class="k">Próximo da lista</div>
+        <div class="v">${prox?prox.nome:'Tudo em dia 🎉'}</div></div>
+      ${prox?`<button class="rsvp" onclick="irPara('prenatal')">Ver</button>`:''}
+    </div>
+    <div class="seclab">Ferramentas rápidas</div>
+    <div class="qgrid">
+      ${qtile('bebe','👶','bg-pink','Acompanhamento','semana a semana')}
+      ${qtile('consultas','📅','bg-sage','Consultas','agenda e registro')}
+      ${qtile('peso','⚖️','bg-lav','Ganho de peso','faixa recomendada')}
+      ${qtile('enxoval','🧺','bg-pink','Enxoval','roupas e itens')}
+      ${qtile('gastos','💰','bg-sage','Gastos','controle do enxoval')}
+      ${qtile('guia','📖','bg-lav','Guia','cuidados e alerta')}
+    </div>`;
+}
+function qtile(t,ic,bg,n,s){ return `<button class="qtile" onclick="irPara('${t}')"><div class="qi">${secIcon(t)}</div><div><div class="qn">${n}</div><div class="qs">${s}</div></div></button>`; }
+function dicaSemana(g){
+  if(g.sem<12) return "Comecem a pesquisar a maternidade e guardem os resultados dos exames num só lugar.";
+  if(g.sem<20) return "Bom momento para planejar o enxoval sem exageros — use a aba Enxoval e o controle de gastos.";
+  if(g.sem<28) return "Comecem a pesquisar pediatras juntos — a maioria dos pais escolhe um até a semana 28.";
+  if(g.sem<34) return "Deixem a mala da maternidade pronta a partir da 32ª semana. Confira a checklist na aba Mala.";
+  return "Revejam o plano de parto e o caminho até a maternidade. Documentos separados e cópias à mão!";
+}
+
+/* ================= BEBÊ & BARRIGA ================= */
+function renderBebe(){
+  const g=calc(); const el=document.getElementById('t-bebe');
+  const w=g?g.sem:24; const b=babyDaSemana(w);
+  const segN=20, filled=Math.round((Math.min(w,40)/40)*segN);
+  let segs=''; for(let i=0;i<segN;i++) segs+=`<i class="${i<filled?'on':''}"></i>`;
+  const ajudarTitulo = ehMae()?'Como se cuidar esta semana':'Como você pode ajudar';
+  const helpKey='w'+b.w;
+  const ajHtml=b.aj.map((a,i)=>{ const on=(D.help[helpKey]||[]).includes(i);
+    return `<div class="help ${on?'on':''}" onclick="toggleHelp('${helpKey}',${i})"><div class="mk"></div><p>${a}</p></div>`;}).join('');
+  el.innerHTML=`
+    <div class="h2">Bebê & Barriga</div>
+    <div class="lead">Semana ${w} de 40</div>
+    <div class="segs">${segs}</div>
+    <div class="card" style="margin-top:12px"><div class="sizeart">
+      <div class="artcircle">${b.e}</div>
+      <div><div class="big">~${String(b.cm).replace('.',',')} cm, ${b.g>=1000?(b.g/1000).toString().replace('.',',')+' kg':b.g+' g'}</div>
+      <div class="sub">${b.dev}</div></div></div></div>
+    <div class="seclab">O que esperar nesta semana</div>
+    ${b.esp.map((e,i)=>`<div class="expect"><span class="e">${i===0?'👶':'🤰'}</span><p>${e}</p></div>`).join('')}
+    <div class="seclab">${ajudarTitulo}</div>
+    <div class="card">${ajHtml}</div>`;
+}
+function toggleHelp(k,i){ if(!D.help[k])D.help[k]=[]; const a=D.help[k]; const ix=a.indexOf(i); if(ix<0)a.push(i);else a.splice(ix,1); salvar(); renderBebe(); }
+
+/* ================= PRÉ-NATAL ================= */
+function renderPrenatal(){
+  const cont=document.getElementById('prenatalLista'); const cur=calc()?.tri||1;
+  cont.innerHTML=[1,2,3].map(t=>{
+    const itens=D.prenatal.filter(x=>x.t===t); const feitos=itens.filter(x=>x.feito).length;
+    const linhas=itens.map(x=>{ const idx=D.prenatal.indexOf(x);
+      return `<div class="item ${x.feito?'done':''}"><div class="chk ${x.feito?'on':''}" onclick="togglePn(${idx})"></div>
+        <div class="txt"><div class="nome">${x.nome}<span class="tagmini ${x.tipo==='consulta'?'t-consulta':'t-exame'}">${x.tipo}</span></div><div class="meta">${x.s}</div></div></div>`;}).join('');
+    const nomes={1:'1º Trimestre (até 13 sem)',2:'2º Trimestre (14–27 sem)',3:'3º Trimestre (28 sem+)'};
+    return `<div class="grupo ${t===cur?'aberto':''}"><div class="grupo-cab" onclick="this.parentNode.classList.toggle('aberto')">
+      <span>${nomes[t]}</span><span class="cont">${feitos}/${itens.length}<span class="seta">▸</span></span></div>
+      <div class="grupo-corpo">${linhas}</div></div>`;
+  }).join('');
+}
+function togglePn(i){ D.prenatal[i].feito=!D.prenatal[i].feito; salvar(); renderPrenatal(); renderInicio(); }
+
+/* ================= ENXOVAL ================= */
+let enxAba='roupas';
+function subEnx(a){ enxAba=a; document.getElementById('subRoupas').className='btn sm'+(a==='roupas'?'':' ghost'); document.getElementById('subAcess').className='btn sm'+(a==='acessorios'?'':' ghost'); renderEnx(); }
+function renderEnx(){
+  const f=enxAba==='roupas'?D.roupas:D.acessorios; const cont=document.getElementById('enxovalLista');
+  cont.innerHTML=Object.keys(f).map((grp,gi)=>{ const itens=f[grp]; const comp=itens.filter(x=>x.c).length;
+    const linhas=itens.map((x,ii)=>`<div class="item ${x.c?'done':''}"><div class="chk ${x.c?'on':''}" onclick="togEnx('${enxAba}','${grp.replace(/'/g,"\\'")}',${ii},'c')"></div>
+      <div class="txt"><div class="nome">${x.n}${x.l?'<span class="tagmini t-lav">lavado</span>':''}</div>
+      <div class="meta"><span onclick="togEnx('${enxAba}','${grp.replace(/'/g,"\\'")}',${ii},'l')" style="cursor:pointer;color:var(--sage-deep)">${x.l?'✓ lavado':'marcar lavado'}</span></div></div>
+      <div class="qtd">${x.q||''}</div></div>`).join('');
+    return `<div class="grupo ${gi===0?'aberto':''}"><div class="grupo-cab" onclick="this.parentNode.classList.toggle('aberto')">
+      <span>${grp}</span><span class="cont">${comp}/${itens.length}<span class="seta">▸</span></span></div><div class="grupo-corpo">${linhas}</div></div>`;
+  }).join('');
+}
+function togEnx(a,g,i,c){ const f=a==='roupas'?D.roupas:D.acessorios; f[g][i][c]=!f[g][i][c]; salvar(); renderEnx(); }
+
+/* ================= MAIS ================= */
+function renderMais(){
+  const el=document.getElementById('t-mais');
+  const rows=[
+    ['caderneta','📔','bg-pink','Caderneta digital','Cartão da gestante, consultas, peso e vacinas'],
+    ['mala','🧳','bg-lav','Mala maternidade','Mãe, bebê, acompanhante e documentos'],
+    ['gastos','💰','bg-sage','Controle de gastos','Orçamento do enxoval em tempo real'],
+    ['direitos','⚖️','bg-pink','Direitos & documentos','Licenças, salário-maternidade e registro'],
+    ['posparto','🍼','bg-areia','Primeiros dias','Pós-parto, recuperação e cuidados'],
+    ['inspiracoes','✨','bg-lav','Inspirações','Quartinho, chá de bebê, nomes'],
+    ['config','⚙️','bg-sage','Meus dados','Perfil, datas e preferências'],
+  ];
+  el.innerHTML=`<div class="h2" style="margin-bottom:14px">Mais</div>`+rows.map(r=>`
+    <div class="mrow" onclick="irPara('${r[0]}')"><div class="mi ${r[2]}">${r[1]}</div>
+    <div class="mt"><div class="a">${r[3]}</div><div class="b">${r[4]}</div></div><div class="chev">›</div></div>`).join('');
+}
+
+/* ================= MALA ================= */
+function renderMala(){
+  const cont=document.getElementById('malaLista'); const ic={'Mãe':'🤱','Bebê':'👶','Acompanhante':'🧑','Documentos':'📄'};
+  cont.innerHTML=Object.keys(D.mala).map((grp,gi)=>{ const itens=D.mala[grp]; const comp=itens.filter(x=>x.c).length;
+    const linhas=itens.map((x,ii)=>`<div class="item ${x.c?'done':''}"><div class="chk sage ${x.c?'on':''}" onclick="togMala('${grp.replace(/'/g,"\\'")}',${ii})"></div>
+      <div class="txt"><div class="nome">${x.n}</div></div><div class="qtd">${x.q||''}</div></div>`).join('');
+    return `<div class="grupo ${gi===0?'aberto':''}"><div class="grupo-cab" onclick="this.parentNode.classList.toggle('aberto')">
+      <span>${ic[grp]||''} ${grp}</span><span class="cont">${comp}/${itens.length}<span class="seta">▸</span></span></div><div class="grupo-corpo">${linhas}</div></div>`;
+  }).join('');
+}
+function togMala(g,i){ D.mala[g][i].c=!D.mala[g][i].c; salvar(); renderMala(); if(document.getElementById('t-direitos').classList.contains('ativa'))renderDireitos(); }
+
+/* ================= GASTOS ================= */
+function renderFin(){
+  const f=D.financeiro; const gasto=f.itens.reduce((s,i)=>s+(i.pago?i.v:0),0); const rest=f.orcamento-gasto;
+  document.getElementById('finOrc').textContent=reais(f.orcamento);
+  document.getElementById('finGasto').textContent=reais(gasto);
+  document.getElementById('finRest').textContent=reais(rest);
+  const bar=document.getElementById('finBarra'); bar.style.width=Math.min(100,f.orcamento?gasto/f.orcamento*100:0)+'%'; bar.parentNode.className='barra'+(gasto>f.orcamento?'':' sage');
+  document.getElementById('finLista').innerHTML=f.itens.length?f.itens.map((i,ix)=>`<div class="fin-item">
+    <div class="chk sage ${i.pago?'on':''}" style="width:20px;height:20px" onclick="togPago(${ix})"></div>
+    <div class="n">${i.n}<div class="cat">${i.cat} · ${i.pago?'pago':'planejado'}</div></div>
+    <div class="val">${reais(i.v)}</div><button class="lixo" onclick="delGasto(${ix})">🗑</button></div>`).join('')
+    :'<p style="color:var(--muted);font-size:14px">Nenhum gasto ainda.</p>';
+}
+function addGasto(){ const n=document.getElementById('finNome').value.trim(); const v=parseFloat(document.getElementById('finVal').value);
+  if(!n||!v){alert('Preencha item e valor.');return;} D.financeiro.itens.push({n,cat:document.getElementById('finCat').value,v,pago:false});
+  document.getElementById('finNome').value='';document.getElementById('finVal').value=''; salvar(); renderFin(); }
+function togPago(i){ D.financeiro.itens[i].pago=!D.financeiro.itens[i].pago; salvar(); renderFin(); }
+function delGasto(i){ D.financeiro.itens.splice(i,1); salvar(); renderFin(); }
+
+/* ================= DIREITOS ================= */
+function renderDireitos(){
+  document.getElementById('direitosInfo').innerHTML=D.direitos.map(x=>`<div class="info-bloco"><h4><span class="ico ${x.c}">${x.i}</span>${x.t}</h4><p>${x.d}</p></div>`).join('');
+  const docs=D.mala.Documentos; document.getElementById('docCont').textContent='· '+docs.filter(d=>d.c).length+'/'+docs.length;
+  document.getElementById('docLista').innerHTML=docs.map((d,i)=>`<div class="item ${d.c?'done':''}"><div class="chk sage ${d.c?'on':''}" onclick="togMala('Documentos',${i});renderDireitos()"></div><div class="txt"><div class="nome">${d.n}</div></div></div>`).join('');
+}
+
+/* ================= PÓS-PARTO ================= */
+function renderPos(){
+  const cont=document.getElementById('pospartoLista'); const ic={'Recuperação da mãe':'💗','Cuidados com o bebê':'🍼','Documentos do bebê':'📋'};
+  cont.innerHTML=Object.keys(D.posparto).map((grp,gi)=>{ const itens=D.posparto[grp]; const f=itens.filter(x=>x.f).length;
+    const linhas=itens.map((x,ii)=>`<div class="item ${x.f?'done':''}"><div class="chk ${x.f?'on':''}" onclick="togPos('${grp.replace(/'/g,"\\'")}',${ii})"></div><div class="txt"><div class="nome">${x.n}</div></div></div>`).join('');
+    return `<div class="grupo ${gi===0?'aberto':''}"><div class="grupo-cab" onclick="this.parentNode.classList.toggle('aberto')"><span>${ic[grp]||''} ${grp}</span><span class="cont">${f}/${itens.length}<span class="seta">▸</span></span></div><div class="grupo-corpo">${linhas}</div></div>`;
+  }).join('');
+  document.getElementById('alertas').innerHTML=D.alertas.map(a=>`<div class="info-bloco"><p>⚠️ ${a}</p></div>`).join('');
+}
+function togPos(g,i){ D.posparto[g][i].f=!D.posparto[g][i].f; salvar(); renderPos(); }
+
+/* ================= INSPIRAÇÕES ================= */
+function renderInsp(){
+  document.getElementById('inspGrid').innerHTML=D.inspiracoes.map((x,i)=>`<div class="insp"><div class="cat">${x.cat}</div><div class="ti">${x.ti}</div>${x.ob?`<div class="ob">${x.ob}</div>`:''}${x.link?`<a href="${x.link}" target="_blank">${x.link}</a>`:''}<button class="lixo" style="position:absolute;top:8px;right:8px" onclick="delInsp(${i})">🗑</button></div>`).join('')||'<p style="color:var(--muted);font-size:14px">Adicione sua primeira inspiração ✨</p>';
+}
+function addInsp(){ const ti=document.getElementById('inspTi').value.trim(); if(!ti){alert('Dê um título.');return;} D.inspiracoes.push({cat:document.getElementById('inspCat').value,ti,ob:'',link:document.getElementById('inspLink').value.trim()}); document.getElementById('inspTi').value='';document.getElementById('inspLink').value=''; salvar(); renderInsp(); }
+function delInsp(i){ D.inspiracoes.splice(i,1); salvar(); renderInsp(); }
+
+/* ================= PERFIL ================= */
+function preencherConfig(){
+  const bs=document.getElementById('btnSair'); if(bs) bs.style.display=(cloud&&user)?'block':'none';
+  document.getElementById('cfgRole').value=D.perfil.role||'mae';
+  document.getElementById('cfgNome').value=D.perfil.nome||'';
+  document.getElementById('cfgBebe').value=D.perfil.bebe||'';
+  document.getElementById('cfgDum').value=D.perfil.dum||'';
+  document.getElementById('cfgDpp').value=D.perfil.dpp||'';
+  document.getElementById('cfgParto').value=D.perfil.parto||'Ainda não decidi';
+}
+function salvarPerfil(){
+  D.perfil.role=document.getElementById('cfgRole').value;
+  D.perfil.nome=document.getElementById('cfgNome').value.trim();
+  D.perfil.bebe=document.getElementById('cfgBebe').value.trim();
+  D.perfil.dum=document.getElementById('cfgDum').value;
+  D.perfil.dpp=document.getElementById('cfgDpp').value;
+  D.perfil.parto=document.getElementById('cfgParto').value;
+  salvar(); initTudo(); irPara('inicio'); alert('Dados salvos! 💛');
+}
+
+/* ================= ONBOARDING ================= */
+let onbStep=0, onbRole=null;
+const ROLES=[
+  {k:'mae',e:'🤰',a:'Sou a mãe / gestante',b:'Acompanhe cada semana e prepare tudo'},
+  {k:'pai',e:'🤝',a:'Sou o pai / parceiro(a)',b:'Apoie e viva a gestação junto'},
+  {k:'apoio',e:'💛',a:'Sou rede de apoio',b:'Ajude a organizar a chegada do bebê'},
+];
+function verOnboarding(){ onbStep=0; onbRole=D.perfil.role||null; document.getElementById('onb').style.display='flex'; renderOnb(); }
+function renderOnb(){
+  const dots=document.getElementById('onbDots'); dots.innerHTML=[0,1,2].map(i=>`<i class="${i===onbStep?'on':''}"></i>`).join('');
+  const body=document.getElementById('onbBody'), foot=document.getElementById('onbFoot');
+  if(onbStep===0){
+    body.innerHTML=`<h1 style="text-align:left;font-size:27px">Quem está usando o Bump?</h1>
+      <p class="p" style="text-align:left;margin:6px 0 22px">Personalizamos as dicas e as tarefas para você.</p>
+      ${ROLES.map(r=>`<div class="role ${onbRole===r.k?'sel':''}" onclick="selRole('${r.k}')"><div class="re">${r.e}</div><div class="rt"><div class="a">${r.a}</div><div class="b">${r.b}</div></div><div class="rc"></div></div>`).join('')}`;
+    foot.innerHTML=`<button class="btn block" style="opacity:${onbRole?1:.5}" onclick="${onbRole?'onbNext()':''}">Continuar</button>`;
+  } else if(onbStep===1){
+    body.innerHTML=`<h1 style="text-align:left;font-size:27px">Sobre vocês</h1>
+      <p class="p" style="text-align:left;margin:6px 0 20px">Usamos a data para calcular a semana da gestação.</p>
+      <div class="campo"><label>Seu nome</label><input id="obNome" value="${D.perfil.nome||''}" placeholder="Ex: Sam"></div>
+      <div class="campo"><label>Nome (ou apelido) do bebê</label><input id="obBebe" value="${D.perfil.bebe||''}" placeholder="Ex: Bento"></div>
+      <div class="campo"><label>Data da última menstruação (DUM)</label><input id="obDum" type="date" value="${D.perfil.dum||''}"></div>
+      <div class="campo"><label>Ou data provável do parto (DPP)</label><input id="obDpp" type="date" value="${D.perfil.dpp||''}"></div>`;
+    foot.innerHTML=`<button class="backghost" onclick="onbBack()">Voltar</button><button class="btn block" onclick="onbSave1()">Continuar</button>`;
+  } else {
+    const quem = onbRole==='mae'?'apoie quem ama e cuide de você':'apoie quem você ama';
+    body.innerHTML=`<div class="onb-illus">ilustração:<br>família + barriga</div>
+      <h1>Vocês estão juntos nessa</h1>
+      <p class="p">Acompanhe cada semana, prepare-se para o grande dia e ${quem} com tranquilidade.</p>`;
+    foot.innerHTML=`<button class="backghost" onclick="onbBack()">Voltar</button><button class="btn block" onclick="onbFinish()">Começar</button>`;
+  }
+}
+function selRole(k){ onbRole=k; renderOnb(); }
+function onbNext(){ onbStep++; renderOnb(); }
+function onbBack(){ onbStep--; renderOnb(); }
+function onbSave1(){
+  D.perfil.nome=document.getElementById('obNome').value.trim();
+  D.perfil.bebe=document.getElementById('obBebe').value.trim();
+  D.perfil.dum=document.getElementById('obDum').value;
+  D.perfil.dpp=document.getElementById('obDpp').value;
+  onbStep=2; renderOnb();
+}
+function onbFinish(){ D.perfil.role=onbRole||'mae'; D.perfil.onboarded=true; salvar(); document.getElementById('onb').style.display='none'; initTudo(); irPara('inicio'); }
+
+/* ================= CADERNETA DIGITAL ================= */
+function sfmt(n){ return String(n).replace('.',','); }
+function imcInfo(){
+  const s=D.saude; const a=parseFloat(s.altura), p=parseFloat(s.pesoPre);
+  if(!a||!p) return null; const imc=p/(a*a);
+  let cls,min,max;
+  if(imc<18.5){cls='Baixo peso';min=9.7;max=12.2;}
+  else if(imc<25){cls='Eutrofia';min=8;max=12;}
+  else if(imc<30){cls='Sobrepeso';min=7;max=9;}
+  else {cls='Obesidade';min=5;max=7.2;}
+  return {imc:imc.toFixed(1),cls,min,max};
+}
+const GUIA=[
+  {e:'🥗',t:'Alimentação saudável',p:[
+    'Faça de alimentos <b>in natura</b> ou minimamente processados a base da alimentação: feijões, cereais, legumes, verduras, frutas, castanhas, leite, carnes e ovos.',
+    'Use óleos, sal e açúcar com moderação ao temperar e cozinhar.',
+    'Evite <b>alimentos ultraprocessados</b> (refrigerantes, salgadinhos de pacote, biscoitos recheados, macarrão instantâneo, embutidos).',
+    'Beba bastante água ao longo do dia e procure comer com calma e em companhia.',
+    'Tome o ácido fólico e o sulfato ferroso conforme a prescrição do pré-natal.']},
+  {e:'😴',t:'Sono e descanso',p:[
+    'Procure dormir cerca de 8 horas por noite e repouse alguns minutos durante o dia.',
+    'Deite-se preferencialmente do <b>lado esquerdo</b>, com um travesseiro entre as pernas — isso facilita a passagem de oxigênio para o bebê.',
+    'Eleve as pernas quando estiver sentada ou deitada.']},
+  {e:'🚶‍♀️',t:'Exercícios',p:[
+    'Caminhadas melhoram a circulação, ajudam a controlar o peso e aumentam a disposição — mantenha-as do início ao fim da gravidez, se não houver contraindicação.',
+    'Prefira atividades físicas leves e prazerosas.',
+    'Exercite a respiração: respire lenta e profundamente várias vezes ao dia.']},
+  {e:'🤢',t:'Sintomas comuns e o que fazer',p:[
+    '<b>Enjoos e vômitos:</b> evite ficar muito tempo em jejum e prefira alimentos secos (bolacha de água e sal, pão, arroz). Se não melhorar, procure a UBS.',
+    '<b>Azia e queimação:</b> coma menos e mais vezes, mastigue devagar e não se deite logo após as refeições.',
+    '<b>Cãibras:</b> alongue-se, beba bastante água e massageie as pernas antes de dormir.',
+    '<b>Varizes:</b> não fique muito tempo em pé ou sentada; eleve as pernas e use meias elásticas.',
+    '<b>Intestino preso:</b> coma alimentos integrais e ricos em fibras, folhas verdes e frutas, e beba muita água.']},
+  {e:'🚨',t:'Sinais de alerta — procure a UBS/maternidade',p:[
+    'Pressão alta, dor de cabeça forte com a visão embaralhada ou enxergando “estrelinhas”.',
+    'Sangramento vaginal ou perda de líquido pela vagina.',
+    'Dor forte na barriga ou contrações antes do tempo.',
+    'Febre, vômitos persistentes ou ardência ao urinar.',
+    'Inchaço súbito no rosto e nas mãos.',
+    'Diminuição ou ausência dos movimentos do bebê.']},
+  {e:'🦟',t:'Proteção contra dengue e zika',p:[
+    'Use repelente todos os dias e coloque telas em portas e janelas.',
+    'Elimine criadouros do mosquito: não deixe água acumulada em vasos, pneus, garrafas, tampinhas e caixas d’água.',
+    'Evite locais fechados e com muitas pessoas para reduzir infecções transmitidas pelo ar.']},
+  {e:'🦷',t:'Saúde bucal',p:[
+    'A gravidez não causa cárie, mas as gengivas ficam mais sensíveis. Escove os dentes e use fio dental diariamente.',
+    'Faça pelo menos uma <b>consulta odontológica</b> durante o pré-natal — é um direito seu pelo SUS.']},
+  {e:'❤️',t:'Sexo na gestação',p:[
+    'O desejo sexual pode aumentar, diminuir ou variar ao longo da gravidez — tudo isso é normal.',
+    'Na ausência de contraindicação médica, a relação sexual é segura durante a gestação.',
+    'Converse com a equipe de saúde em caso de sangramento, dor ou orientação para evitar relações.']},
+  {e:'👶',t:'Reconhecendo o trabalho de parto',p:[
+    'É comum a barriga endurecer várias vezes ao dia (contrações de treino). Tome banho, repouse e observe se continuam.',
+    'Dias antes, pode sair um muco grosso e amarelado com raias de sangue — o <b>tampão mucoso</b>.',
+    '<b>Vá à maternidade se:</b> a barriga endurecer a cada 5 minutos, por 30 segundos ou mais, por mais de 1 hora; ou se perder líquido pela vagina (suspeita de bolsa rompida), mesmo sem contrações.']},
+  {e:'🌸',t:'O que favorece o parto',p:[
+    'Mude de posição buscando conforto: em pé, de cócoras, de quatro, sentada na bola ou caminhando.',
+    'Caminhar e se movimentar podem encurtar o trabalho de parto; o banho morno alivia a dor.',
+    'Beba água e coma para ter energia; respire profundamente para manter a calma.',
+    'Você tem direito, por lei, a um <b>acompanhante</b> de sua escolha durante todo o período.']},
+  {e:'🤱',t:'Amamentação',p:[
+    'Nos primeiros 6 meses o bebê só precisa do leite materno — não ofereça chá, água ou outro leite.',
+    'Amamente em livre demanda: quanto mais o bebê mamar, mais leite você terá.',
+    'Boa pega: o bebê abocanha a aréola, com os lábios virados para fora, o queixo na mama e o nariz livre.',
+    'Lave a mama só com água; não use sabonete nem pomada. Evite chupetas.']},
+  {e:'💗',t:'Puerpério e contracepção',p:[
+    'Descanse sempre que o bebê dormir e aceite ajuda com as tarefas e os cuidados.',
+    'Retorne à UBS na 1ª semana após o parto e faça a consulta de puerpério (até 42 dias).',
+    'As relações sexuais devem aguardar cerca de 42 dias. Combine um método contraceptivo compatível com a amamentação e use camisinha para proteção contra IST.']},
+  {e:'🕊️',t:'Perda gestacional',p:[
+    'Às vezes a gravidez pode chegar ao fim antes do esperado, especialmente nos primeiros três meses.',
+    'Se isso acontecer, não significa que você não poderá engravidar novamente.',
+    'Busque apoio e converse com um profissional de saúde sobre suas dúvidas e sentimentos.']},
+];
+
+function renderCaderneta(){
+  const el=document.getElementById('t-caderneta'); const im=imcInfo();
+  const rows=[
+    ['saude','🪪','bg-lav','Dados de saúde','Cartão SUS, tipo sanguíneo, contato de emergência'],
+    ['consultas','🩺','bg-sage','Consultas de pré-natal','Peso, pressão, altura uterina e batimentos'],
+    ['peso','⚖️','bg-pink','Ganho de peso','Acompanhe pela faixa recomendada'],
+    ['vacinas','💉','bg-areia','Vacinas','dTpa, dT, gripe, hepatite B e COVID-19'],
+    ['guia','📖','bg-lav','Guia de cuidados','Alimentação, sintomas, sinais de alerta, parto'],
+    ['partorec','🍼','bg-sage','Registro do parto','Anote os dados do nascimento'],
+  ];
+  el.innerHTML=`<div class="h2">Caderneta</div>
+    <div class="lead">Sua caderneta digital, baseada na Caderneta da Gestante do Ministério da Saúde (8ª ed., 2023).</div>
+    ${im?`<div class="card" style="margin-top:12px"><div class="seclab" style="margin-top:0">Resumo de saúde</div>
+      <div class="vitals">
+        <div class="vital"><div class="vk">IMC pré-gestacional</div><div class="vv">${im.imc}</div></div>
+        <div class="vital"><div class="vk">Classificação</div><div class="vv" style="font-size:15px">${im.cls}</div></div>
+        <div class="vital"><div class="vk">Tipo sanguíneo</div><div class="vv">${(D.saude.tipoSangue||'—')+(D.saude.rh||'')}</div></div>
+        <div class="vital"><div class="vk">Ganho recomendado</div><div class="vv" style="font-size:15px">${sfmt(im.min)}–${sfmt(im.max)} kg</div></div>
+      </div></div>`:''}
+    <div style="margin-top:6px">${rows.map(r=>`<div class="mrow" onclick="irPara('${r[0]}')"><div class="mi ${r[2]}">${r[1]}</div><div class="mt"><div class="a">${r[3]}</div><div class="b">${r[4]}</div></div><div class="chev">›</div></div>`).join('')}</div>`;
+}
+
+function renderSaude(){
+  const s=D.saude; const el=document.getElementById('t-saude'); const im=imcInfo();
+  el.innerHTML=`
+  ${im?`<div class="card"><div class="seclab" style="margin-top:0">IMC pré-gestacional</div>
+    <div style="display:flex;align-items:center;gap:14px"><div style="font-size:32px;font-weight:800">${im.imc}</div>
+    <div><span class="imc-tag">${im.cls}</span><div class="lead" style="margin-top:5px">Ganho recomendado até 40 sem: <b>${sfmt(im.min)}–${sfmt(im.max)} kg</b></div></div></div></div>`:''}
+  <div class="card"><div class="seclab" style="margin-top:0">Identificação</div>
+    <div class="field"><label>Como gosta de ser chamada</label><input id="sChamada" value="${s.chamada||''}"></div>
+    <div class="field"><label>Nº do Cartão SUS (CNS)</label><input id="sCns" value="${s.cns||''}" placeholder="000 0000 0000 0000"></div>
+    <div class="field"><label>Nº do NIS (opcional)</label><input id="sNis" value="${s.nis||''}"></div>
+    <div><div class="field half"><label>Tipo sanguíneo</label><select id="sTipo">${['','A','B','AB','O'].map(o=>`<option ${s.tipoSangue===o?'selected':''}>${o}</option>`).join('')}</select></div><div class="field half" style="margin-left:8px"><label>Fator Rh</label><select id="sRh">${['','+','-'].map(o=>`<option ${s.rh===o?'selected':''}>${o}</option>`).join('')}</select></div></div>
+    <div><div class="field half"><label>Altura (m)</label><input id="sAltura" type="number" step="0.01" value="${s.altura||''}"></div><div class="field half" style="margin-left:8px"><label>Peso antes da gravidez (kg)</label><input id="sPeso" type="number" step="0.1" value="${s.pesoPre||''}"></div></div>
+    <div class="field"><label>Alergias / condições de saúde</label><input id="sAlerg" value="${s.alergias||''}" placeholder="Ex: alergia a penicilina"></div>
+  </div>
+  <div class="card"><div class="seclab" style="margin-top:0">Em emergência, ligar para</div>
+    <div class="field"><label>Nome</label><input id="sEmN" value="${s.emergNome||''}"></div>
+    <div><div class="field half"><label>Telefone</label><input id="sEmT" value="${s.emergTel||''}"></div><div class="field half" style="margin-left:8px"><label>Relação</label><select id="sEmR">${['Companheiro(a)','Familiar','Amiga(o)','Outros'].map(o=>`<option ${s.emergRel===o?'selected':''}>${o}</option>`).join('')}</select></div></div>
+  </div>
+  <button class="btn block" onclick="salvarSaude()">Salvar dados de saúde</button>`;
+}
+function salvarSaude(){ const g=id=>document.getElementById(id).value;
+  Object.assign(D.saude,{chamada:g('sChamada'),cns:g('sCns'),nis:g('sNis'),tipoSangue:g('sTipo'),rh:g('sRh'),altura:parseFloat(g('sAltura'))||'',pesoPre:parseFloat(g('sPeso'))||'',alergias:g('sAlerg'),emergNome:g('sEmN'),emergTel:g('sEmT'),emergRel:g('sEmR')});
+  salvar(); renderSaude(); renderCaderneta(); alert('Dados de saúde salvos 💛'); }
+
+function renderConsultas(){
+  const el=document.getElementById('t-consultas');
+  const lista=D.consultasReg.slice().sort((a,b)=>b.sem-a.sem).map(c=>{ const i=D.consultasReg.indexOf(c);
+    return `<div class="reg-item"><div class="rh"><span class="sem">${c.sem}ª semana</span><span class="dt">${c.data||'sem data'}<button class="lixo" onclick="delConsulta(${i})">🗑</button></span></div>
+      <div class="reg-grid">
+        <div><div class="a">${c.peso?sfmt(c.peso):'—'}</div><div class="b">peso (kg)</div></div>
+        <div><div class="a">${c.pa||'—'}</div><div class="b">pressão</div></div>
+        <div><div class="a">${c.au||'—'}</div><div class="b">alt. uterina</div></div>
+        <div><div class="a">${c.bcf||'—'}</div><div class="b">bcf (bpm)</div></div>
+      </div></div>`;}).join('');
+  el.innerHTML=`<div class="aviso">🩺 A cada consulta a equipe verifica peso, pressão, altura uterina e os batimentos do bebê (BCF). Registre aqui para acompanhar a evolução.</div>
+    <div class="card" style="margin-top:12px"><div class="seclab" style="margin-top:0">Nova consulta</div>
+      <div><div class="field half"><label>Semana</label><input id="cSem" type="number"></div><div class="field half" style="margin-left:8px"><label>Data</label><input id="cData" type="date"></div></div>
+      <div><div class="field half"><label>Peso (kg)</label><input id="cPeso" type="number" step="0.1"></div><div class="field half" style="margin-left:8px"><label>Pressão (ex: 110/70)</label><input id="cPa"></div></div>
+      <div><div class="field half"><label>Altura uterina (cm)</label><input id="cAu" type="number"></div><div class="field half" style="margin-left:8px"><label>BCF (bpm)</label><input id="cBcf" type="number"></div></div>
+      <button class="btn block" onclick="addConsulta()">Adicionar consulta</button>
+    </div>
+    <div class="seclab">Consultas registradas</div>
+    ${lista||'<p style="color:var(--muted);font-size:14px">Nenhuma consulta registrada ainda.</p>'}`;
+}
+function addConsulta(){ const g=id=>document.getElementById(id).value; const sem=parseInt(g('cSem'));
+  if(!sem){alert('Informe a semana da consulta.');return;}
+  let dt=g('cData'); if(dt){const p=dt.split('-');dt=p[2]+'/'+p[1]+'/'+p[0];}
+  const kg=parseFloat(g('cPeso'))||'';
+  D.consultasReg.push({sem,data:dt,peso:kg,pa:g('cPa'),au:parseInt(g('cAu'))||'',bcf:parseInt(g('cBcf'))||''});
+  if(kg) D.pesoLog.push({sem,kg});
+  salvar(); renderConsultas(); }
+function delConsulta(i){ D.consultasReg.splice(i,1); salvar(); renderConsultas(); }
+
+function renderPeso(){
+  const el=document.getElementById('t-peso'); const im=imcInfo();
+  const log=D.pesoLog.slice().sort((a,b)=>a.sem-b.sem); const last=log[log.length-1];
+  const gain=(im&&last)?(last.kg-parseFloat(D.saude.pesoPre)):null;
+  const barPct=(im&&gain!=null)?Math.max(0,Math.min(100,gain/im.max*100)):0;
+  let msg=''; if(im&&gain!=null){ msg = gain>im.max?'Acima da faixa total recomendada — vale conversar com a equipe de saúde.':(gain<0?'Atenção à perda de peso — informe a equipe do pré-natal.':'Dentro do esperado. Continue o acompanhamento!'); }
+  el.innerHTML=`${im?`<div class="card"><div class="seclab" style="margin-top:0">Faixa recomendada · ${im.cls}</div>
+    <div class="lead">Para o seu IMC pré-gestacional (${im.imc}), o ganho total recomendado até 40 semanas é de <b>${sfmt(im.min)} a ${sfmt(im.max)} kg</b>.</div>
+    ${gain!=null?`<div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13.5px"><span>Ganho até agora (sem ${last.sem})</span><b>${gain>=0?'+':''}${sfmt(Number(gain.toFixed(1)))} kg</b></div>
+    <div class="wbar"><span style="width:${barPct}%"></span></div><div class="lead">${msg}</div>`:''}</div>`
+    :'<div class="aviso d">⚠️ Informe sua altura e peso antes da gravidez em “Dados de saúde” para calcular a faixa recomendada.</div>'}
+    <div class="card"><div class="seclab" style="margin-top:0">Registrar peso</div>
+      <div class="add-row"><input id="pSem" type="number" placeholder="Semana" style="max-width:110px"><input id="pKg" type="number" step="0.1" placeholder="Peso (kg)"><button class="btn" onclick="addPeso()">Salvar</button></div></div>
+    <div class="card"><div class="seclab" style="margin-top:0">Histórico</div>
+      ${log.length?log.map(w=>{const i=D.pesoLog.indexOf(w);return `<div class="fin-item"><div class="n">${w.sem}ª semana</div><div class="val">${sfmt(w.kg)} kg</div><button class="lixo" onclick="delPeso(${i})">🗑</button></div>`;}).join(''):'<p style="color:var(--muted);font-size:14px">Nenhum registro ainda.</p>'}</div>`;
+}
+function addPeso(){ const s=parseInt(document.getElementById('pSem').value), k=parseFloat(document.getElementById('pKg').value); if(!s||!k){alert('Informe semana e peso.');return;} D.pesoLog.push({sem:s,kg:k}); salvar(); renderPeso(); }
+function delPeso(i){ D.pesoLog.splice(i,1); salvar(); renderPeso(); }
+
+function renderVacinas(){
+  const el=document.getElementById('t-vacinas');
+  el.innerHTML=`<div class="aviso">💉 A vacina dTpa (tétano, difteria e coqueluche) deve ser tomada a partir da 20ª semana e protege você e o bebê. Confira seu cartão de vacinação com a equipe.</div>
+    <div class="card" style="margin-top:12px">${D.vacinas.map((v,i)=>`
+      <div class="item ${v.feito?'done':''}"><div class="chk sage ${v.feito?'on':''}" onclick="togVac(${i})"></div>
+      <div class="txt"><div class="nome">${v.n}</div><div class="meta">${v.quando}${v.feito&&v.data?' · aplicada em '+v.data:''}</div></div></div>`).join('')}</div>`;
+}
+function togVac(i){ const v=D.vacinas[i]; v.feito=!v.feito; if(v.feito&&!v.data){ v.data=new Date().toLocaleDateString('pt-BR'); } salvar(); renderVacinas(); }
+
+function renderGuia(){
+  const el=document.getElementById('t-guia');
+  el.innerHTML=`<div class="lead" style="margin-bottom:12px">Orientações da Caderneta da Gestante para uma gestação saudável e segura. Toque para expandir.</div>`+
+    GUIA.map(s=>`<div class="grupo"><div class="grupo-cab" onclick="this.parentNode.classList.toggle('aberto')"><span>${s.e} ${s.t}</span><span class="cont"><span class="seta">▸</span></span></div><div class="grupo-corpo guia-body">${s.p.map(p=>`<p>${p}</p>`).join('')}</div></div>`).join('');
+}
+
+function renderPartoRec(){
+  const el=document.getElementById('t-partorec'); const r=D.partoRec;
+  el.innerHTML=`<div class="aviso">🍼 Espaço para registrar (ou o profissional de saúde anotar) os dados do parto e do nascimento.</div>
+    <div class="card" style="margin-top:12px">
+      <div><div class="field half"><label>Tipo de parto</label><select id="prTipo">${['','Vaginal','Cesárea'].map(o=>`<option ${r.tipo===o?'selected':''}>${o}</option>`).join('')}</select></div><div class="field half" style="margin-left:8px"><label>Data</label><input id="prData" type="date" value="${r.data||''}"></div></div>
+      <div class="field"><label>Maternidade</label><input id="prLocal" value="${r.local||''}"></div>
+      <div><div class="field half"><label>Peso do bebê (kg)</label><input id="prPeso" type="number" step="0.01" value="${r.peso||''}"></div><div class="field half" style="margin-left:8px"><label>Comprimento (cm)</label><input id="prComp" type="number" value="${r.comp||''}"></div></div>
+      <div><div class="field half"><label>Apgar 1º min</label><input id="prA1" type="number" value="${r.apgar1||''}"></div><div class="field half" style="margin-left:8px"><label>Apgar 5º min</label><input id="prA2" type="number" value="${r.apgar5||''}"></div></div>
+      <div class="field"><label>Observações</label><textarea id="prObs" rows="2">${r.obs||''}</textarea></div>
+      <button class="btn block" onclick="salvarParto()">Salvar registro</button>
+    </div>`;
+}
+function salvarParto(){ const g=id=>document.getElementById(id).value; Object.assign(D.partoRec,{tipo:g('prTipo'),data:g('prData'),local:g('prLocal'),peso:g('prPeso'),comp:g('prComp'),apgar1:g('prA1'),apgar5:g('prA2'),obs:g('prObs')}); salvar(); alert('Registro do parto salvo 💛'); }
+
+/* ================= EXAMES & ANEXOS (nuvem) ================= */
+function avisoNuvem(msg){ return `<div class="aviso d">☁️ ${msg} Ative o login na nuvem (configuração do Supabase + Sair/Entrar) para usar em qualquer celular.</div>`; }
+function renderExames(){
+  const el=document.getElementById('t-exames');
+  if(!cloud||!user){ el.innerHTML=avisoNuvem('Os anexos ficam salvos na nuvem, com segurança, para você acessar de qualquer aparelho.'); return; }
+  const its=(D.anexos||[]).slice().sort((a,b)=>b.ts-a.ts);
+  el.innerHTML=`<div class="aviso">📎 Guarde resultados de exames, laudos e receitas (PDF ou foto). Só quem tem o login da conta consegue ver.</div>
+    <div class="card" style="margin-top:12px"><div class="seclab" style="margin-top:0">Enviar arquivo</div>
+      <div class="field"><label>Descrição</label><input id="axNome" placeholder="Ex: Ultrassom morfológico 20 sem"></div>
+      <input id="axFile" type="file" accept="image/*,application/pdf" style="display:none" onchange="uploadAnexo()">
+      <button class="btn block" onclick="document.getElementById('axFile').click()">📎 Escolher arquivo</button>
+      <div id="axStatus" class="lead" style="margin-top:8px"></div>
+    </div>
+    <div class="seclab">Arquivos</div>
+    ${its.length?its.map(a=>`<div class="fin-item"><div class="n">${a.nome||a.file}<div class="cat">${a.file} · ${a.data}</div></div><button class="btn sm" onclick="abrirAnexo('${a.id}')">Abrir</button><button class="lixo" onclick="delAnexo('${a.id}')">🗑</button></div>`).join(''):'<p style="color:var(--muted);font-size:14px">Nenhum arquivo ainda.</p>'}`;
+}
+async function uploadAnexo(){
+  const inp=document.getElementById('axFile'); const f=inp.files[0]; if(!f)return;
+  const nome=document.getElementById('axNome').value.trim();
+  const st=document.getElementById('axStatus'); st.textContent='Enviando…';
+  const path=`${user.id}/exames/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+  const {error}=await sb.storage.from('anexos').upload(path,f,{upsert:false});
+  if(error){ st.textContent='Erro ao enviar: '+error.message; return; }
+  D.anexos=D.anexos||[]; D.anexos.push({id:'a'+Date.now(),path,file:f.name,nome,data:new Date().toLocaleDateString('pt-BR'),ts:Date.now()});
+  inp.value=''; salvar(); renderExames();
+}
+async function abrirAnexo(id){ const a=(D.anexos||[]).find(x=>x.id===id); if(!a)return; try{const {data}=await sb.storage.from('anexos').createSignedUrl(a.path,3600); if(data&&data.signedUrl) window.open(data.signedUrl,'_blank'); }catch(e){ alert('Não foi possível abrir o arquivo.'); } }
+async function delAnexo(id){ const a=(D.anexos||[]).find(x=>x.id===id); if(!a)return; if(!confirm('Remover este arquivo?'))return; try{await sb.storage.from('anexos').remove([a.path]);}catch(e){} D.anexos=(D.anexos||[]).filter(x=>x.id!==id); salvar(); renderExames(); }
+
+async function renderFotos(){
+  const el=document.getElementById('t-fotos');
+  if(!cloud||!user){ el.innerHTML=avisoNuvem('As fotos ficam salvas na nuvem para acompanhar a evolução de qualquer aparelho.'); return; }
+  const its=(D.fotos||[]).slice().sort((a,b)=>b.ts-a.ts);
+  let cards='';
+  for(const p of its){ let url=''; try{const {data}=await sb.storage.from('anexos').createSignedUrl(p.path,3600); url=data?data.signedUrl:'';}catch(e){}
+    cards+=`<div class="insp" style="padding:0;overflow:hidden"><img src="${url}" alt="" style="width:100%;height:130px;object-fit:cover;display:block"><div style="padding:8px 10px"><div class="ob">${p.nome||''} ${p.data}</div></div><button class="lixo" style="position:absolute;top:6px;right:6px;background:rgba(255,255,255,.85);border-radius:8px" onclick="delFoto('${p.id}')">🗑</button></div>`;
+  }
+  el.innerHTML=`<div class="aviso">📷 Registre a evolução da barriga e os ultrassons. As fotos sincronizam entre os aparelhos com o mesmo login.</div>
+    <input id="ftFile" type="file" accept="image/*" style="display:none" onchange="uploadFoto()">
+    <button class="btn block" style="margin:12px 0" onclick="document.getElementById('ftFile').click()">📷 Adicionar foto</button>
+    <div id="ftStatus" class="lead" style="margin-bottom:8px"></div>
+    <div class="insp-grid">${cards||'<p style="color:var(--muted);font-size:14px">Nenhuma foto ainda.</p>'}</div>`;
+}
+async function uploadFoto(){
+  const inp=document.getElementById('ftFile'); const f=inp.files[0]; if(!f)return;
+  const st=document.getElementById('ftStatus'); st.textContent='Enviando…';
+  const path=`${user.id}/fotos/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+  const {error}=await sb.storage.from('anexos').upload(path,f,{upsert:false});
+  if(error){ st.textContent='Erro ao enviar: '+error.message; return; }
+  D.fotos=D.fotos||[]; D.fotos.push({id:'f'+Date.now(),path,nome:'',data:new Date().toLocaleDateString('pt-BR'),ts:Date.now()});
+  inp.value=''; salvar(); renderFotos();
+}
+async function delFoto(id){ const p=(D.fotos||[]).find(x=>x.id===id); if(!p)return; if(!confirm('Remover esta foto?'))return; try{await sb.storage.from('anexos').remove([p.path]);}catch(e){} D.fotos=(D.fotos||[]).filter(x=>x.id!==id); salvar(); renderFotos(); }
+
+/* ================= LOGIN (nuvem) ================= */
+function mostrarLogin(msg){ document.getElementById('authGate').style.display='flex'; renderLogin(msg); }
+let authModo='entrar';
+function renderLogin(msg){
+  const b=document.getElementById('authBody');
+  b.innerHTML=`<div style="margin:auto 0;width:100%">
+    <div style="display:flex;justify-content:center;margin:0 auto 22px"><span class="logo-mark big"><span class="p"></span><span class="s"></span></span></div>
+    <h1 style="font-size:26px">${authModo==='entrar'?'Entrar no Bump':'Criar conta'}</h1>
+    <p class="p" style="margin:6px auto 22px">Login compartilhado: use o mesmo e-mail e senha nos dois celulares para ver os mesmos dados.</p>
+    <div class="field"><label>E-mail</label><input id="authEmail" type="email" autocomplete="username" value="${(document.getElementById('authEmail')||{}).value||''}"></div>
+    <div class="field"><label>Senha</label><input id="authPass" type="password" autocomplete="current-password"></div>
+    ${msg?`<div class="aviso d" style="margin-top:2px">${msg}</div>`:''}
+    <div style="text-align:center;margin-top:12px"><a href="#" onclick="authModo='${authModo==='entrar'?'criar':'entrar'}';renderLogin();return false" style="font-size:13.5px">${authModo==='entrar'?'Ainda não tem conta? Criar':'Já tenho conta. Entrar'}</a></div>
+  </div>`;
+  document.getElementById('authFoot').innerHTML=`<button class="btn block" onclick="fazerAuth()">${authModo==='entrar'?'Entrar':'Criar conta'}</button>`;
+}
+async function fazerAuth(){
+  const email=(document.getElementById('authEmail').value||'').trim(), pass=document.getElementById('authPass').value;
+  if(!email||!pass){ renderLogin('Preencha e-mail e senha.'); return; }
+  document.getElementById('authFoot').innerHTML='<div class="lead" style="text-align:center;width:100%">Um instante…</div>';
+  try{
+    let res;
+    if(authModo==='criar'){ res=await sb.auth.signUp({email,password:pass}); if(res.error){renderLogin('Erro: '+res.error.message);return;}
+      if(!res.data.session){ renderLogin('Conta criada! Confirme pelo e-mail (se pedido) e depois entre.'); authModo='entrar'; return; } }
+    else { res=await sb.auth.signInWithPassword({email,password:pass}); if(res.error){renderLogin('Não foi possível entrar: '+res.error.message);return;} }
+    user=res.data.user||res.data.session.user;
+    document.getElementById('authGate').style.display='none';
+    await carregarRemoto(); continuarBoot();
+  }catch(e){ renderLogin('Falha de conexão. Tente novamente.'); }
+}
+async function sair(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.reload(); }
+
+/* ================= NAV ================= */
+const MAIN=['inicio','secBebe','secSaude','secEnxoval','secAdmin'];
+function irPara(t){
+  document.querySelectorAll('.tela').forEach(s=>s.classList.remove('ativa'));
+  document.getElementById('t-'+t).classList.add('ativa');
+  const navKey = MAIN.includes(t)?t:(PARENT[t]||'inicio');
+  document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.t===navKey));
+  renderHero(t);
+  document.getElementById('scroll').scrollTop=0;
+  ({inicio:renderInicio,secBebe:renderSecBebe,secSaude:renderSecSaude,secEnxoval:renderSecEnxoval,secAdmin:renderSecAdmin,bebe:renderBebe,prenatal:renderPrenatal,enxoval:renderEnx,mala:renderMala,gastos:renderFin,direitos:renderDireitos,posparto:renderPos,inspiracoes:renderInsp,config:preencherConfig,saude:renderSaude,consultas:renderConsultas,peso:renderPeso,vacinas:renderVacinas,guia:renderGuia,partorec:renderPartoRec,exames:renderExames,fotos:renderFotos}[t]||(()=>{}))();
+}
+document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>irPara(b.dataset.t));
+
+/* ================= INIT ================= */
+function initTudo(){ renderInicio();renderSecBebe();renderSecSaude();renderSecEnxoval();renderSecAdmin();renderBebe();renderPrenatal();renderEnx();renderMala();renderFin();renderDireitos();renderPos();renderInsp();preencherConfig();renderSaude();renderConsultas();renderPeso();renderVacinas();renderGuia();renderPartoRec();renderExames();renderFotos();renderMenu();renderHero('inicio'); }
+function continuarBoot(){ if(!D.perfil.onboarded){ verOnboarding(); } else { document.getElementById('onb').style.display='none'; } initTudo(); }
+async function boot(){
+  if(cloud){
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(session&&session.user){ user=session.user; await carregarRemoto(); }
+      else { mostrarLogin(); return; }
+    }catch(e){ mostrarLogin(); return; }
+  }
+  continuarBoot();
+}
+boot();
+
+/* PWA: registrar service worker para instalar e funcionar offline */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+</script>
+</body>
+</html>
