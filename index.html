@@ -250,6 +250,12 @@
     <span class="rig">📶 &nbsp;🔋</span>
   </div>
 
+  <!-- LOGIN (nuvem) -->
+  <div class="onb" id="authGate" style="display:none">
+    <div class="onb-body" id="authBody"></div>
+    <div class="onb-foot" id="authFoot"></div>
+  </div>
+
   <!-- ONBOARDING -->
   <div class="onb" id="onb" style="display:none">
     <div class="band"><div class="onb-dots" id="onbDots"></div></div>
@@ -346,6 +352,9 @@
       <section class="tela" id="t-vacinas"></section>
       <section class="tela" id="t-guia"></section>
       <section class="tela" id="t-partorec"></section>
+      <!-- ANEXOS / FOTOS (nuvem) -->
+      <section class="tela" id="t-exames"></section>
+      <section class="tela" id="t-fotos"></section>
       <!-- PERFIL -->
       <section class="tela" id="t-config">
         <div class="card">
@@ -361,6 +370,7 @@
         </div>
         <button class="btn ghost block" style="margin-bottom:11px" onclick="verOnboarding()">Rever introdução</button>
         <button class="btn ghost block" onclick="resetar()">Restaurar dados de exemplo</button>
+        <button class="btn ghost block" id="btnSair" style="display:none;margin-top:11px" onclick="sair()">Sair da conta</button>
         <div class="aviso" style="margin-top:14px">ℹ️ O Bump é um organizador e não substitui orientação médica. Confirme exames, prazos e itens com seu obstetra e sua maternidade.</div>
       </section>
     </div>
@@ -375,7 +385,17 @@
   </nav>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ================= CONFIG DA NUVEM (Supabase) =================
+   Para ativar o login compartilhado e o upload de exames/fotos,
+   cole abaixo a URL e a chave "anon public" do seu projeto Supabase.
+   Enquanto estiverem em branco, o app funciona normalmente só neste aparelho. */
+const SUPA_URL = ''; // ex: https://abcdxyz.supabase.co
+const SUPA_KEY = ''; // chave anon public (Settings > API)
+let sb=null, cloud=false, user=null, pushTimer=null;
+try{ if(SUPA_URL && SUPA_KEY && window.supabase){ sb=window.supabase.createClient(SUPA_URL,SUPA_KEY); cloud=true; } }catch(e){ cloud=false; }
+
 /* ================= DADOS ================= */
 function dadosPadrao(){
   const hoje=new Date(); const dum=new Date(hoje); dum.setDate(dum.getDate()-7*24); // ~24 semanas
@@ -454,6 +474,7 @@ function dadosPadrao(){
     {n:"COVID-19", quando:"Conforme calendário vigente", feito:false, data:""},
   ],
   partoRec:{ tipo:"", data:"", local:"", peso:"", comp:"", apgar1:"", apgar5:"", obs:"" },
+  anexos:[], fotos:[],
   };
 }
 
@@ -482,8 +503,18 @@ function babyDaSemana(w){ let best=BABY[0]; for(const b of BABY){ if(w>=b.w) bes
 
 /* ================= ESTADO ================= */
 let D=carregar();
-function carregar(){ try{const s=localStorage.getItem('bump'); if(s){const d=JSON.parse(s); const def=dadosPadrao(); for(const k in def){ if(d[k]===undefined) d[k]=def[k]; } return d;}}catch(e){} return dadosPadrao(); }
-function salvar(){ try{localStorage.setItem('bump',JSON.stringify(D));}catch(e){} }
+function mergeDefaults(d){ const def=dadosPadrao(); for(const k in def){ if(d[k]===undefined) d[k]=def[k]; } return d; }
+function carregar(){ try{const s=localStorage.getItem('bump'); if(s){return mergeDefaults(JSON.parse(s));}}catch(e){} return dadosPadrao(); }
+function salvarLocal(){ try{localStorage.setItem('bump',JSON.stringify(D));}catch(e){} }
+function salvar(){ salvarLocal(); if(cloud&&user){ clearTimeout(pushTimer); pushTimer=setTimeout(pushRemoto,800); } }
+async function pushRemoto(){ if(!cloud||!user)return; try{ await sb.from('app_state').upsert({user_id:user.id,data:D,updated_at:new Date().toISOString()},{onConflict:'user_id'}); }catch(e){} }
+async function carregarRemoto(){
+  try{
+    const {data}=await sb.from('app_state').select('data').eq('user_id',user.id).maybeSingle();
+    if(data&&data.data){ D=mergeDefaults(data.data); salvarLocal(); }
+    else { await pushRemoto(); } // primeira vez: envia o estado local para a nuvem
+  }catch(e){}
+}
 function resetar(){ if(confirm('Restaurar dados de exemplo? Suas alterações serão apagadas.')){ D=dadosPadrao(); salvar(); irPara('inicio'); initTudo(); } }
 
 /* ================= CÁLCULOS ================= */
@@ -508,15 +539,15 @@ function ehMae(){ return D.perfil.role==='mae'; }
 /* ================= HEADER ================= */
 const SECTIONS=['secBebe','secSaude','secEnxoval','secAdmin'];
 const PARENT={
-  bebe:'secBebe',posparto:'secBebe',partorec:'secBebe',
-  saude:'secSaude',prenatal:'secSaude',peso:'secSaude',vacinas:'secSaude',guia:'secSaude',
+  bebe:'secBebe',posparto:'secBebe',partorec:'secBebe',fotos:'secBebe',
+  saude:'secSaude',prenatal:'secSaude',peso:'secSaude',vacinas:'secSaude',guia:'secSaude',exames:'secSaude',
   enxoval:'secEnxoval',mala:'secEnxoval',inspiracoes:'secEnxoval',
   consultas:'secAdmin',gastos:'secAdmin',direitos:'secAdmin',config:'secAdmin'
 };
 const TITULOS={
   secBebe:'Bebê',secSaude:'Saúde',secEnxoval:'Enxoval',secAdmin:'Admin',
-  bebe:'Acompanhamento semanal',posparto:'Primeiros dias',partorec:'Registro do nascimento',
-  saude:'Dados de saúde',prenatal:'Exames do pré-natal',peso:'Ganho de peso',vacinas:'Vacinas',guia:'Guia de cuidados',
+  bebe:'Acompanhamento semanal',posparto:'Primeiros dias',partorec:'Registro do nascimento',fotos:'Fotos da barriga',
+  saude:'Dados de saúde',prenatal:'Exames do pré-natal',peso:'Ganho de peso',vacinas:'Vacinas',guia:'Guia de cuidados',exames:'Exames & anexos',
   enxoval:'Enxoval',mala:'Mala maternidade',inspiracoes:'Inspirações',
   consultas:'Consultas',gastos:'Controle de gastos',direitos:'Direitos & documentos',config:'Meus dados'
 };
@@ -543,7 +574,8 @@ function hubHTML(sub,rows){
 }
 function renderSecBebe(){ document.getElementById('t-secBebe').innerHTML=hubHTML('Acompanhe o desenvolvimento e os cuidados com o bebê.',[
   ['bebe','👶','bg-pink','Acompanhamento semanal','Tamanho, desenvolvimento e como ajudar'],
-  ['posparto','🍼','bg-lav','Primeiros dias','Pós-parto, recuperação e cuidados do bebê'],
+  ['fotos','📷','bg-lav','Fotos da barriga','Evolução e ultrassons (na nuvem)'],
+  ['posparto','🍼','bg-areia','Primeiros dias','Pós-parto, recuperação e cuidados do bebê'],
   ['partorec','📋','bg-sage','Registro do nascimento','Dados do parto e do bebê'],
 ]); }
 function renderSecSaude(){ document.getElementById('t-secSaude').innerHTML=hubHTML('Sua caderneta de saúde da gestante, baseada no Ministério da Saúde.',[
@@ -551,6 +583,7 @@ function renderSecSaude(){ document.getElementById('t-secSaude').innerHTML=hubHT
   ['prenatal','🩺','bg-sage','Exames do pré-natal','Consultas e exames por trimestre'],
   ['peso','⚖️','bg-pink','Ganho de peso','Faixa recomendada pelo seu IMC'],
   ['vacinas','💉','bg-areia','Vacinas','dTpa, dT, gripe, hepatite B, COVID-19'],
+  ['exames','📎','bg-pink','Exames & anexos','Resultados e laudos (PDF/foto), na nuvem'],
   ['guia','📖','bg-lav','Guia de cuidados','Alimentação, sinais de alerta, parto'],
 ]); }
 function renderSecEnxoval(){ document.getElementById('t-secEnxoval').innerHTML=hubHTML('Prepare o enxoval e a chegada do bebê, sem exageros.',[
@@ -739,6 +772,7 @@ function delInsp(i){ D.inspiracoes.splice(i,1); salvar(); renderInsp(); }
 
 /* ================= PERFIL ================= */
 function preencherConfig(){
+  const bs=document.getElementById('btnSair'); if(bs) bs.style.display=(cloud&&user)?'block':'none';
   document.getElementById('cfgRole').value=D.perfil.role||'mae';
   document.getElementById('cfgNome').value=D.perfil.nome||'';
   document.getElementById('cfgBebe').value=D.perfil.bebe||'';
@@ -998,6 +1032,92 @@ function renderPartoRec(){
 }
 function salvarParto(){ const g=id=>document.getElementById(id).value; Object.assign(D.partoRec,{tipo:g('prTipo'),data:g('prData'),local:g('prLocal'),peso:g('prPeso'),comp:g('prComp'),apgar1:g('prA1'),apgar5:g('prA2'),obs:g('prObs')}); salvar(); alert('Registro do parto salvo 💛'); }
 
+/* ================= EXAMES & ANEXOS (nuvem) ================= */
+function avisoNuvem(msg){ return `<div class="aviso d">☁️ ${msg} Ative o login na nuvem (configuração do Supabase + Sair/Entrar) para usar em qualquer celular.</div>`; }
+function renderExames(){
+  const el=document.getElementById('t-exames');
+  if(!cloud||!user){ el.innerHTML=avisoNuvem('Os anexos ficam salvos na nuvem, com segurança, para você acessar de qualquer aparelho.'); return; }
+  const its=(D.anexos||[]).slice().sort((a,b)=>b.ts-a.ts);
+  el.innerHTML=`<div class="aviso">📎 Guarde resultados de exames, laudos e receitas (PDF ou foto). Só quem tem o login da conta consegue ver.</div>
+    <div class="card" style="margin-top:12px"><div class="seclab" style="margin-top:0">Enviar arquivo</div>
+      <div class="field"><label>Descrição</label><input id="axNome" placeholder="Ex: Ultrassom morfológico 20 sem"></div>
+      <input id="axFile" type="file" accept="image/*,application/pdf" style="display:none" onchange="uploadAnexo()">
+      <button class="btn block" onclick="document.getElementById('axFile').click()">📎 Escolher arquivo</button>
+      <div id="axStatus" class="lead" style="margin-top:8px"></div>
+    </div>
+    <div class="seclab">Arquivos</div>
+    ${its.length?its.map(a=>`<div class="fin-item"><div class="n">${a.nome||a.file}<div class="cat">${a.file} · ${a.data}</div></div><button class="btn sm" onclick="abrirAnexo('${a.id}')">Abrir</button><button class="lixo" onclick="delAnexo('${a.id}')">🗑</button></div>`).join(''):'<p style="color:var(--muted);font-size:14px">Nenhum arquivo ainda.</p>'}`;
+}
+async function uploadAnexo(){
+  const inp=document.getElementById('axFile'); const f=inp.files[0]; if(!f)return;
+  const nome=document.getElementById('axNome').value.trim();
+  const st=document.getElementById('axStatus'); st.textContent='Enviando…';
+  const path=`${user.id}/exames/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+  const {error}=await sb.storage.from('anexos').upload(path,f,{upsert:false});
+  if(error){ st.textContent='Erro ao enviar: '+error.message; return; }
+  D.anexos=D.anexos||[]; D.anexos.push({id:'a'+Date.now(),path,file:f.name,nome,data:new Date().toLocaleDateString('pt-BR'),ts:Date.now()});
+  inp.value=''; salvar(); renderExames();
+}
+async function abrirAnexo(id){ const a=(D.anexos||[]).find(x=>x.id===id); if(!a)return; try{const {data}=await sb.storage.from('anexos').createSignedUrl(a.path,3600); if(data&&data.signedUrl) window.open(data.signedUrl,'_blank'); }catch(e){ alert('Não foi possível abrir o arquivo.'); } }
+async function delAnexo(id){ const a=(D.anexos||[]).find(x=>x.id===id); if(!a)return; if(!confirm('Remover este arquivo?'))return; try{await sb.storage.from('anexos').remove([a.path]);}catch(e){} D.anexos=(D.anexos||[]).filter(x=>x.id!==id); salvar(); renderExames(); }
+
+async function renderFotos(){
+  const el=document.getElementById('t-fotos');
+  if(!cloud||!user){ el.innerHTML=avisoNuvem('As fotos ficam salvas na nuvem para acompanhar a evolução de qualquer aparelho.'); return; }
+  const its=(D.fotos||[]).slice().sort((a,b)=>b.ts-a.ts);
+  let cards='';
+  for(const p of its){ let url=''; try{const {data}=await sb.storage.from('anexos').createSignedUrl(p.path,3600); url=data?data.signedUrl:'';}catch(e){}
+    cards+=`<div class="insp" style="padding:0;overflow:hidden"><img src="${url}" alt="" style="width:100%;height:130px;object-fit:cover;display:block"><div style="padding:8px 10px"><div class="ob">${p.nome||''} ${p.data}</div></div><button class="lixo" style="position:absolute;top:6px;right:6px;background:rgba(255,255,255,.85);border-radius:8px" onclick="delFoto('${p.id}')">🗑</button></div>`;
+  }
+  el.innerHTML=`<div class="aviso">📷 Registre a evolução da barriga e os ultrassons. As fotos sincronizam entre os aparelhos com o mesmo login.</div>
+    <input id="ftFile" type="file" accept="image/*" style="display:none" onchange="uploadFoto()">
+    <button class="btn block" style="margin:12px 0" onclick="document.getElementById('ftFile').click()">📷 Adicionar foto</button>
+    <div id="ftStatus" class="lead" style="margin-bottom:8px"></div>
+    <div class="insp-grid">${cards||'<p style="color:var(--muted);font-size:14px">Nenhuma foto ainda.</p>'}</div>`;
+}
+async function uploadFoto(){
+  const inp=document.getElementById('ftFile'); const f=inp.files[0]; if(!f)return;
+  const st=document.getElementById('ftStatus'); st.textContent='Enviando…';
+  const path=`${user.id}/fotos/${Date.now()}_${f.name.replace(/[^\w.\-]/g,'_')}`;
+  const {error}=await sb.storage.from('anexos').upload(path,f,{upsert:false});
+  if(error){ st.textContent='Erro ao enviar: '+error.message; return; }
+  D.fotos=D.fotos||[]; D.fotos.push({id:'f'+Date.now(),path,nome:'',data:new Date().toLocaleDateString('pt-BR'),ts:Date.now()});
+  inp.value=''; salvar(); renderFotos();
+}
+async function delFoto(id){ const p=(D.fotos||[]).find(x=>x.id===id); if(!p)return; if(!confirm('Remover esta foto?'))return; try{await sb.storage.from('anexos').remove([p.path]);}catch(e){} D.fotos=(D.fotos||[]).filter(x=>x.id!==id); salvar(); renderFotos(); }
+
+/* ================= LOGIN (nuvem) ================= */
+function mostrarLogin(msg){ document.getElementById('authGate').style.display='flex'; renderLogin(msg); }
+let authModo='entrar';
+function renderLogin(msg){
+  const b=document.getElementById('authBody');
+  b.innerHTML=`<div style="margin:auto 0;width:100%">
+    <div class="onb-illus" style="width:96px;height:96px;margin:0 auto 20px;font-size:38px">🕊️</div>
+    <h1 style="font-size:26px">${authModo==='entrar'?'Entrar no Bump':'Criar conta'}</h1>
+    <p class="p" style="margin:6px auto 22px">Login compartilhado: use o mesmo e-mail e senha nos dois celulares para ver os mesmos dados.</p>
+    <div class="field"><label>E-mail</label><input id="authEmail" type="email" autocomplete="username" value="${(document.getElementById('authEmail')||{}).value||''}"></div>
+    <div class="field"><label>Senha</label><input id="authPass" type="password" autocomplete="current-password"></div>
+    ${msg?`<div class="aviso d" style="margin-top:2px">${msg}</div>`:''}
+    <div style="text-align:center;margin-top:12px"><a href="#" onclick="authModo='${authModo==='entrar'?'criar':'entrar'}';renderLogin();return false" style="font-size:13.5px">${authModo==='entrar'?'Ainda não tem conta? Criar':'Já tenho conta. Entrar'}</a></div>
+  </div>`;
+  document.getElementById('authFoot').innerHTML=`<button class="btn block" onclick="fazerAuth()">${authModo==='entrar'?'Entrar':'Criar conta'}</button>`;
+}
+async function fazerAuth(){
+  const email=(document.getElementById('authEmail').value||'').trim(), pass=document.getElementById('authPass').value;
+  if(!email||!pass){ renderLogin('Preencha e-mail e senha.'); return; }
+  document.getElementById('authFoot').innerHTML='<div class="lead" style="text-align:center;width:100%">Um instante…</div>';
+  try{
+    let res;
+    if(authModo==='criar'){ res=await sb.auth.signUp({email,password:pass}); if(res.error){renderLogin('Erro: '+res.error.message);return;}
+      if(!res.data.session){ renderLogin('Conta criada! Confirme pelo e-mail (se pedido) e depois entre.'); authModo='entrar'; return; } }
+    else { res=await sb.auth.signInWithPassword({email,password:pass}); if(res.error){renderLogin('Não foi possível entrar: '+res.error.message);return;} }
+    user=res.data.user||res.data.session.user;
+    document.getElementById('authGate').style.display='none';
+    await carregarRemoto(); continuarBoot();
+  }catch(e){ renderLogin('Falha de conexão. Tente novamente.'); }
+}
+async function sair(){ try{ if(sb) await sb.auth.signOut(); }catch(e){} location.reload(); }
+
 /* ================= NAV ================= */
 const MAIN=['inicio','secBebe','secSaude','secEnxoval','secAdmin'];
 function irPara(t){
@@ -1007,14 +1127,24 @@ function irPara(t){
   document.querySelectorAll('#tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.t===navKey));
   renderHero(t);
   document.getElementById('scroll').scrollTop=0;
-  ({inicio:renderInicio,secBebe:renderSecBebe,secSaude:renderSecSaude,secEnxoval:renderSecEnxoval,secAdmin:renderSecAdmin,bebe:renderBebe,prenatal:renderPrenatal,enxoval:renderEnx,mala:renderMala,gastos:renderFin,direitos:renderDireitos,posparto:renderPos,inspiracoes:renderInsp,config:preencherConfig,saude:renderSaude,consultas:renderConsultas,peso:renderPeso,vacinas:renderVacinas,guia:renderGuia,partorec:renderPartoRec}[t]||(()=>{}))();
+  ({inicio:renderInicio,secBebe:renderSecBebe,secSaude:renderSecSaude,secEnxoval:renderSecEnxoval,secAdmin:renderSecAdmin,bebe:renderBebe,prenatal:renderPrenatal,enxoval:renderEnx,mala:renderMala,gastos:renderFin,direitos:renderDireitos,posparto:renderPos,inspiracoes:renderInsp,config:preencherConfig,saude:renderSaude,consultas:renderConsultas,peso:renderPeso,vacinas:renderVacinas,guia:renderGuia,partorec:renderPartoRec,exames:renderExames,fotos:renderFotos}[t]||(()=>{}))();
 }
 document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>irPara(b.dataset.t));
 
 /* ================= INIT ================= */
-function initTudo(){ renderInicio();renderSecBebe();renderSecSaude();renderSecEnxoval();renderSecAdmin();renderBebe();renderPrenatal();renderEnx();renderMala();renderFin();renderDireitos();renderPos();renderInsp();preencherConfig();renderSaude();renderConsultas();renderPeso();renderVacinas();renderGuia();renderPartoRec();renderHero('inicio'); }
-if(!D.perfil.onboarded){ verOnboarding(); } else { document.getElementById('onb').style.display='none'; }
-initTudo();
+function initTudo(){ renderInicio();renderSecBebe();renderSecSaude();renderSecEnxoval();renderSecAdmin();renderBebe();renderPrenatal();renderEnx();renderMala();renderFin();renderDireitos();renderPos();renderInsp();preencherConfig();renderSaude();renderConsultas();renderPeso();renderVacinas();renderGuia();renderPartoRec();renderExames();renderFotos();renderHero('inicio'); }
+function continuarBoot(){ if(!D.perfil.onboarded){ verOnboarding(); } else { document.getElementById('onb').style.display='none'; } initTudo(); }
+async function boot(){
+  if(cloud){
+    try{
+      const {data:{session}}=await sb.auth.getSession();
+      if(session&&session.user){ user=session.user; await carregarRemoto(); }
+      else { mostrarLogin(); return; }
+    }catch(e){ mostrarLogin(); return; }
+  }
+  continuarBoot();
+}
+boot();
 </script>
 </body>
 </html>
