@@ -291,15 +291,49 @@
   .logo-word{font-family:'Nunito',sans-serif;font-weight:800;font-size:22px;letter-spacing:-.01em;color:var(--ink)}
   .logo-mark.big{width:72px;height:72px}
   .logo-mark.big .s{width:38px;height:38px;border-width:4px}
+
+  /* ===== App normal: sem moldura de iPhone, sem barra de status ===== */
+  .phone{background:var(--bg);box-shadow:none}
+  @media(min-width:480px){ .phone{border:none;border-radius:24px;box-shadow:0 12px 44px oklch(40% 0.02 60 / .12);height:calc(100vh - 44px);max-height:920px} }
+  .hero{background:transparent;padding:0}
+  .pad{padding:14px 18px 40px}
+
+  /* Top bar (logo-menu à esquerda, avatar à direita) */
+  .topbar{display:flex;align-items:center;justify-content:space-between;
+    padding:calc(15px + env(safe-area-inset-top)) 18px 6px}
+  .brand{display:flex;align-items:center;gap:8px;background:none;padding:4px 6px 4px 2px;border-radius:12px}
+  .brand:active{background:var(--areia)}
+  .brand .caret{color:var(--muted);font-size:11px;margin-left:1px;transform:translateY(1px)}
+  .avatar{border:none}
+  .page-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:25px;letter-spacing:-.3px;padding:2px 18px 2px}
+  .leaf-head{display:flex;align-items:center;gap:10px;padding:2px 14px 2px}
+  .leaf-head .page-title{padding:0;font-size:20px}
+  .backx{width:34px;height:34px;border-radius:50%;background:var(--card);border:1px solid var(--line);
+    font-size:19px;color:var(--ink);display:grid;place-items:center;flex-shrink:0}
+
+  /* Menu dropdown a partir do logo */
+  .menu-backdrop{position:absolute;inset:0;z-index:45;display:none}
+  .menu-backdrop.open{display:block}
+  .menu-drop{position:absolute;top:calc(56px + env(safe-area-inset-top));left:16px;width:236px;z-index:50;
+    background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px;
+    box-shadow:0 16px 36px oklch(38% 0.03 60 / .18);display:none}
+  .menu-drop.open{display:block;animation:menuIn .16s ease}
+  @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.98)}to{opacity:1;transform:none}}
+  .menu-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:11px;cursor:pointer;
+    font-family:'Nunito',sans-serif;font-weight:700;font-size:15px;color:var(--ink)}
+  .menu-item.on{background:var(--sage-soft);color:var(--sage-deep)}
+  .menu-item .mi{width:28px;height:28px;display:grid;place-items:center;color:var(--muted)}
+  .menu-item.on .mi{color:var(--sage-deep)}
+  .menu-sep{height:1px;background:var(--line);margin:5px 8px}
+
+  /* ===== Ícones de linha, cor única, sem tiles coloridos (menos "Notion") ===== */
+  .mrow .mi,.qtile .qi{background:oklch(96% 0.008 150);color:var(--sage-deep)}
+  .mrow .mi svg,.qtile .qi svg,.menu-item .mi svg{width:19px;height:19px;display:block}
+  .qtile .qi svg{width:20px;height:20px}
 </style>
 </head>
 <body>
 <div class="phone">
-  <div class="statusbar">
-    <span>9:41</span><div class="notch"></div>
-    <span class="rig">📶 &nbsp;🔋</span>
-  </div>
-
   <!-- LOGIN (nuvem) -->
   <div class="onb" id="authGate" style="display:none">
     <div class="onb-body" id="authBody"></div>
@@ -315,6 +349,8 @@
 
   <!-- APP HEADER (dynamic) -->
   <div class="hero" id="hero"></div>
+  <div class="menu-backdrop" id="menuBg" onclick="closeMenu()"></div>
+  <div class="menu-drop" id="menuDrop"></div>
 
   <div class="scroll" id="scroll">
     <div class="pad">
@@ -431,13 +467,6 @@
     </div>
   </div>
 
-  <nav class="tab" id="tabbar">
-    <button data-t="inicio" class="on"><span class="i">🏠</span>Início</button>
-    <button data-t="secBebe"><span class="i">👶</span>Bebê</button>
-    <button data-t="secSaude"><span class="i">🩺</span>Saúde</button>
-    <button data-t="secEnxoval"><span class="i">🧺</span>Enxoval</button>
-    <button data-t="secAdmin"><span class="i">🗂️</span>Admin</button>
-  </nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -625,26 +654,60 @@ const TITULOS={
   enxoval:'Enxoval',mala:'Mala maternidade',inspiracoes:'Inspirações',
   consultas:'Consultas',gastos:'Controle de gastos',direitos:'Direitos & documentos',config:'Meus dados'
 };
+/* ===== Ícones de linha (SVG, cor única) ===== */
+function svg(p){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;}
+const ICON={
+  home:'<path d="M4 11l8-6 8 6"/><path d="M6 10v9h5v-5h2v5h5v-9"/>',
+  baby:'<circle cx="12" cy="7.5" r="3"/><path d="M6.5 20c0-3 2.5-5.5 5.5-5.5S17.5 17 17.5 20"/><path d="M10 7.3h.01M14 7.3h.01"/>',
+  heart:'<path d="M12 20S4 15 4 9.5A3.5 3.5 0 0 1 12 7a3.5 3.5 0 0 1 8 2.5C20 15 12 20 12 20z"/>',
+  basket:'<path d="M5 9h14l-1.1 9a2 2 0 0 1-2 1.8H8.1a2 2 0 0 1-2-1.8z"/><path d="M9 9l3-5 3 5"/><path d="M10 13v3M14 13v3"/>',
+  folder:'<path d="M4 7a2 2 0 0 1 2-2h3.5l2 2H18a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/>',
+  photo:'<rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.5"/><path d="M5 17l4.5-4 3.5 3 3-2.5L19 17"/>',
+  sun:'<circle cx="12" cy="12" r="3.4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/>',
+  doc:'<path d="M7 3h7l4 4v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v4h4"/><path d="M9 13h6M9 16.5h4"/>',
+  id:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="11" r="2"/><path d="M5.6 16c.5-1.5 1.9-2.1 2.9-2.1s2.4.6 2.9 2.1"/><path d="M14 10h4M14 13.5h4"/>',
+  pulse:'<path d="M3 12h3l2-5 3.5 10L16 9l1.5 3H21"/>',
+  scaleup:'<path d="M4 20h16"/><path d="M7 20v-5M12 20V9M17 20v-8"/><path d="M14.5 6.5L17 4l2.5 2.5"/>',
+  syringe:'<path d="M14 4l6 6M18.5 5.5l-2 2M11 7l6 6-6 6-1.6-1.6 1.6-1.6-2-2-1.6 1.6-2-2 1.6-1.6-2-2z"/>',
+  clip:'<path d="M16.5 8.5l-7 7a2.7 2.7 0 0 1-3.8-3.8L13 4.4a1.8 1.8 0 0 1 2.6 2.6L8.2 14.3"/>',
+  book:'<path d="M6 4h11a1 1 0 0 1 1 1v13H6.5A2.5 2.5 0 0 0 4 20.5V6a2 2 0 0 1 2-2z"/><path d="M6 18h12"/>',
+  shirt:'<path d="M9 4l-4.5 3L6 10l2-1v10h8V9l2 1 1.5-3L15 4l-3 2.2L9 4z"/>',
+  bag:'<path d="M6.5 8h11l-1 11.5H7.5z"/><path d="M9.2 8V6.2a2.8 2.8 0 0 1 5.6 0V8"/>',
+  star:'<path d="M12 4l2.1 4.5 4.9.6-3.6 3.4 1 4.9L12 15.9 7.6 17.4l1-4.9L5 9.1l4.9-.6z"/>',
+  calendar:'<rect x="4" y="5.5" width="16" height="14.5" rx="2"/><path d="M4 10h16M8.5 3v4M15.5 3v4"/>',
+  wallet:'<rect x="3.5" y="6" width="17" height="13" rx="2.2"/><path d="M3.5 10h17"/><circle cx="16.5" cy="14" r="1.1"/>',
+  shield:'<path d="M12 3l7 2.8V11c0 4.6-3 7.7-7 9-4-1.3-7-4.4-7-9V5.8z"/><path d="M9.2 12l2 2 3.6-3.8"/>',
+  gear:'<circle cx="12" cy="12" r="3"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6L18 18M18 6l-1.4 1.4M7.4 16.6L6 18"/>',
+};
+function secIcon(key){ const m={inicio:'home',secBebe:'baby',secSaude:'heart',secEnxoval:'basket',secAdmin:'folder',
+  bebe:'baby',fotos:'photo',posparto:'sun',partorec:'doc',saude:'id',prenatal:'pulse',peso:'scaleup',vacinas:'syringe',exames:'clip',guia:'book',enxoval:'shirt',mala:'bag',inspiracoes:'star',consultas:'calendar',gastos:'wallet',direitos:'shield',config:'gear'};
+  return svg(ICON[m[key]]||ICON.folder); }
+
+/* ===== Menu suspenso a partir do logo ===== */
+const MENUSEC=[['inicio','Início'],['secBebe','Bebê'],['secSaude','Saúde'],['secEnxoval','Enxoval'],['secAdmin','Admin']];
+function renderMenu(){ const m=document.getElementById('menuDrop'); if(!m)return;
+  m.innerHTML=MENUSEC.map(s=>`<div class="menu-item" data-k="${s[0]}" onclick="irPara('${s[0]}');closeMenu()"><span class="mi">${secIcon(s[0])}</span>${s[1]}</div>`).join('')
+   +`<div class="menu-sep"></div><div class="menu-item" data-k="config" onclick="irPara('config');closeMenu()"><span class="mi">${secIcon('config')}</span>Meus dados</div>`;
+}
+let menuOpen=false;
+function toggleMenu(e){ if(e){e.stopPropagation();} menuOpen=!menuOpen; document.getElementById('menuDrop').classList.toggle('open',menuOpen); document.getElementById('menuBg').classList.toggle('open',menuOpen); }
+function closeMenu(){ menuOpen=false; const d=document.getElementById('menuDrop'),b=document.getElementById('menuBg'); if(d)d.classList.remove('open'); if(b)b.classList.remove('open'); }
+function updateMenuActive(k){ document.querySelectorAll('#menuDrop .menu-item').forEach(el=>el.classList.toggle('on', el.dataset.k===k)); }
+
+function topbarHTML(){ const nome=D.perfil.nome||'';
+  return `<div class="topbar">
+    <button class="brand" onclick="toggleMenu(event)"><span class="logo-mark"><span class="p"></span><span class="s"></span></span><span class="logo-word">bump</span><span class="caret">▾</span></button>
+    <button class="avatar" onclick="irPara('config')">${(nome[0]||'B').toUpperCase()}</button></div>`;
+}
 function renderHero(t){
-  const hero=document.getElementById('hero');
-  if(t==='inicio'){
-    const nome=D.perfil.nome||'';
-    hero.innerHTML=`<div class="hero-row"><div class="brand"><span class="logo-mark"><span class="p"></span><span class="s"></span></span><span class="logo-word">bump</span></div>
-      <div class="avatar">${(nome[0]||'B').toUpperCase()}</div></div>`;
-    return;
-  }
-  if(SECTIONS.includes(t)){
-    hero.innerHTML=`<div class="hero-row"><div style="font-weight:800;font-size:21px">${TITULOS[t]}</div>
-      <div class="cbtn" onclick="irPara('config')">⋯</div></div>`;
-    return;
-  }
-  const back=PARENT[t]||'inicio';
-  hero.innerHTML=`<div class="hero-row"><div class="cbtn" onclick="irPara('${back}')">‹</div>
-    <div style="font-weight:800;font-size:17px">${TITULOS[t]||''}</div>
-    <div class="cbtn" onclick="irPara('config')">⋯</div></div>`;
+  const hero=document.getElementById('hero'); let below='';
+  if(SECTIONS.includes(t)){ below=`<div class="page-title">${TITULOS[t]}</div>`; }
+  else if(t!=='inicio'){ const back=PARENT[t]||'inicio'; below=`<div class="leaf-head"><button class="backx" onclick="irPara('${back}')">‹</button><div class="page-title">${TITULOS[t]||''}</div></div>`; }
+  hero.innerHTML=topbarHTML()+below;
+  updateMenuActive(SECTIONS.includes(t)?t:(t==='inicio'?'inicio':(PARENT[t]||'inicio')));
 }
 function hubHTML(sub,rows){
-  return `<div class="lead" style="margin:-2px 0 14px">${sub}</div>`+rows.map(r=>`<div class="mrow" onclick="irPara('${r[0]}')"><div class="mi ${r[2]}">${r[1]}</div><div class="mt"><div class="a">${r[3]}</div><div class="b">${r[4]}</div></div><div class="chev">›</div></div>`).join('');
+  return `<div class="lead" style="margin:-2px 0 14px">${sub}</div>`+rows.map(r=>`<div class="mrow" onclick="irPara('${r[0]}')"><div class="mi">${secIcon(r[0])}</div><div class="mt"><div class="a">${r[3]}</div><div class="b">${r[4]}</div></div><div class="chev">›</div></div>`).join('');
 }
 function renderSecBebe(){ document.getElementById('t-secBebe').innerHTML=hubHTML('Acompanhe o desenvolvimento e os cuidados com o bebê.',[
   ['bebe','👶','bg-pink','Acompanhamento semanal','Tamanho, desenvolvimento e como ajudar'],
@@ -705,7 +768,7 @@ function renderInicio(){
       ${qtile('guia','📖','bg-lav','Guia','cuidados e alerta')}
     </div>`;
 }
-function qtile(t,ic,bg,n,s){ return `<button class="qtile" onclick="irPara('${t}')"><div class="qi ${bg}">${ic}</div><div><div class="qn">${n}</div><div class="qs">${s}</div></div></button>`; }
+function qtile(t,ic,bg,n,s){ return `<button class="qtile" onclick="irPara('${t}')"><div class="qi">${secIcon(t)}</div><div><div class="qn">${n}</div><div class="qs">${s}</div></div></button>`; }
 function dicaSemana(g){
   if(g.sem<12) return "Comecem a pesquisar a maternidade e guardem os resultados dos exames num só lugar.";
   if(g.sem<20) return "Bom momento para planejar o enxoval sem exageros — use a aba Enxoval e o controle de gastos.";
@@ -1206,7 +1269,7 @@ function irPara(t){
 document.querySelectorAll('#tabbar button').forEach(b=>b.onclick=()=>irPara(b.dataset.t));
 
 /* ================= INIT ================= */
-function initTudo(){ renderInicio();renderSecBebe();renderSecSaude();renderSecEnxoval();renderSecAdmin();renderBebe();renderPrenatal();renderEnx();renderMala();renderFin();renderDireitos();renderPos();renderInsp();preencherConfig();renderSaude();renderConsultas();renderPeso();renderVacinas();renderGuia();renderPartoRec();renderExames();renderFotos();renderHero('inicio'); }
+function initTudo(){ renderInicio();renderSecBebe();renderSecSaude();renderSecEnxoval();renderSecAdmin();renderBebe();renderPrenatal();renderEnx();renderMala();renderFin();renderDireitos();renderPos();renderInsp();preencherConfig();renderSaude();renderConsultas();renderPeso();renderVacinas();renderGuia();renderPartoRec();renderExames();renderFotos();renderMenu();renderHero('inicio'); }
 function continuarBoot(){ if(!D.perfil.onboarded){ verOnboarding(); } else { document.getElementById('onb').style.display='none'; } initTudo(); }
 async function boot(){
   if(cloud){
