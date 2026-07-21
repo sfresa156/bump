@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Bump · Gravidez a dois</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#e79ba6">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bump">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <style>
   :root{
     --bg:#f6efe6; --bg2:#f8ded9;
@@ -371,6 +379,11 @@
         <button class="btn ghost block" style="margin-bottom:11px" onclick="verOnboarding()">Rever introdução</button>
         <button class="btn ghost block" onclick="resetar()">Restaurar dados de exemplo</button>
         <button class="btn ghost block" id="btnSair" style="display:none;margin-top:11px" onclick="sair()">Sair da conta</button>
+        <div class="seclab" style="margin:18px 2px 8px">Backup dos seus dados</div>
+        <button class="btn ghost block" onclick="exportarDados()">⬇️ Baixar backup (.json)</button>
+        <input id="impFile" type="file" accept="application/json,.json" style="display:none" onchange="importarDados()">
+        <button class="btn ghost block" style="margin-top:11px" onclick="document.getElementById('impFile').click()">⬆️ Restaurar de um backup</button>
+        <div class="lead" style="margin-top:8px">Sem nuvem, seus dados ficam só neste aparelho. Baixe um backup de vez em quando para não perder nada.</div>
         <div class="aviso" style="margin-top:14px">ℹ️ O Bump é um organizador e não substitui orientação médica. Confirme exames, prazos e itens com seu obstetra e sua maternidade.</div>
       </section>
     </div>
@@ -516,6 +529,25 @@ async function carregarRemoto(){
   }catch(e){}
 }
 function resetar(){ if(confirm('Restaurar dados de exemplo? Suas alterações serão apagadas.')){ D=dadosPadrao(); salvar(); irPara('inicio'); initTudo(); } }
+function exportarDados(){
+  try{
+    const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.href=url; a.download='bump-backup-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},120);
+  }catch(e){ alert('Não foi possível gerar o backup.'); }
+}
+function importarDados(){
+  const inp=document.getElementById('impFile'); const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{ try{ const obj=JSON.parse(r.result);
+    if(!obj||!obj.perfil){ alert('Arquivo de backup inválido.'); return; }
+    if(!confirm('Restaurar este backup? Os dados atuais neste aparelho serão substituídos.')) return;
+    D=mergeDefaults(obj); salvar(); initTudo(); irPara('inicio'); alert('Backup restaurado 💛');
+  }catch(e){ alert('Não foi possível ler o arquivo.'); } inp.value=''; };
+  r.readAsText(f);
+}
 
 /* ================= CÁLCULOS ================= */
 function calc(){
@@ -1145,6 +1177,9 @@ async function boot(){
   continuarBoot();
 }
 boot();
+
+/* PWA: registrar service worker para instalar e funcionar offline */
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>{ navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
 </script>
 </body>
 </html>
